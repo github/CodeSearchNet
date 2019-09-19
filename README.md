@@ -41,15 +41,18 @@
   # clone this repository
   git clone https://github.com/ml-msr-github/CodeSearchNet.git
   cd CodeSearchNet/
-  # download data (~3.5GB) from S3; build and run Docker container
+  # download data (~3.5GB) from S3; build and run the Docker container
   script/setup
-  # this will drop you into the shell inside a docker container.
+  # this will drop you into the shell inside a Docker container
   script/console
-  # optional: log in to W&B to track your experiments, and submit your results to the benchmark
+  # optional: log in to W&B to see your training metrics,
+  # track your experiments, and submit your models to the benchmark
   wandb login
+
   # verify your setup by training a tiny model
   python train.py --testrun
-  # see other command line options and try a full training run with default values
+  # see other command line options, try a full training run with default values,
+  # and explore other model variants by extending this baseline script
   python train.py --help
   python train.py
 
@@ -57,18 +60,18 @@
   python predict.py -r github/codesearchnet/0123456 # this is the org/project_name/run_id
   ```
 
-Finally, you can submit your run to the [community benchmark](https://app.wandb.ai/github/codesearchnet/benchmark) by following these [instructions](src/docs/BENCHMARK.md).
+Finally, you can submit your run to the [community benchmark](https://app.wandb.ai/github/codesearchnet/benchmark) by following these [instructions](BENCHMARK.md).
 
 # Introduction
 
 ## Project Overview
 
-  [CodeSearchNet][paper] is a collection of datasets and benchmarks that explore the problem of code retrieval using natural language.  This research is a continuation of some ideas presented in this [blog post](https://githubengineering.com/towards-natural-language-semantic-code-search/) and is a joint collaboration between GitHub and the [Deep Program Understanding](https://www.microsoft.com/en-us/research/project/program/) group at [Microsoft Research - Cambridge](https://www.microsoft.com/en-us/research/lab/microsoft-research-cambridge/).  Our intent is to present and provide a platform for this research to the community by providing the following:
+  [CodeSearchNet][paper] is a collection of datasets and benchmarks that explore the problem of code retrieval using natural language.  This research is a continuation of some ideas presented in this [blog post](https://githubengineering.com/towards-natural-language-semantic-code-search/) and is a joint collaboration between GitHub and the [Deep Program Understanding](https://www.microsoft.com/en-us/research/project/program/) group at [Microsoft Research - Cambridge](https://www.microsoft.com/en-us/research/lab/microsoft-research-cambridge/).  We aim to provide a platform for community research on semantic code search via the following: 
 
   1. Instructions for obtaining large corpora of relevant data
   2. Open source code for a range of baseline models, along with pre-trained weights
-  3. Baseline evaluation metrics and utilities.
-  4. Mechanisms to track progress on a [shared community benchmark](https://app.wandb.ai/github/codesearchnet/benchmark), hosted by [Weights & Biases](https://www.wandb.com/)
+  3. Baseline evaluation metrics and utilities
+  4. Mechanisms to track progress on a [shared community benchmark](https://app.wandb.ai/github/codesearchnet/benchmark) hosted by [Weights & Biases](https://www.wandb.com/)
 
 We hope that CodeSearchNet is a step towards engaging with the broader machine learning and NLP community regarding the relationship between source code and natural language. We describe a specific task here, but we expect and welcome other uses of our dataset.
 
@@ -76,7 +79,7 @@ More context regarding the motivation for this problem is in this [technical rep
 
 ## Data
 
-  The primary dataset consists of 2 Million (`comment`, `code`) pairs from open source libraries.  Concretely, a `comment` is a top-level function or method comment (e.g. [docstrings](https://en.wikipedia.org/wiki/Docstring) in Python), and `code` is an entire function or method. Currently, the dataset contains Python, Javascript, Ruby, Go, Java, and PHP code.  Throughout this repo, we refer to the terms docstring and query interchangeably.  We partition the data into train, validation, and test splits such that code from the same repository can only exist in one partition. Currently this is the only dataset on which we train our model. Summary stastics about this dataset can be found in [this notebook](notebooks/ExploreData.ipynb)
+  The primary dataset consists of 2 million (`comment`, `code`) pairs from open source libraries.  Concretely, a `comment` is a top-level function or method comment (e.g. [docstrings](https://en.wikipedia.org/wiki/Docstring) in Python), and `code` is an entire function or method. Currently, the dataset contains Python, Javascript, Ruby, Go, Java, and PHP code.  Throughout this repo, we refer to the terms docstring and query interchangeably.  We partition the data into train, validation, and test splits such that code from the same repository can only exist in one partition. Currently this is the only dataset on which we train our model. Summary stastics about this dataset can be found in [this notebook](notebooks/ExploreData.ipynb)
 
   For more information about how to obtain the data, see [this section](#data-details).
 
@@ -86,7 +89,7 @@ More context regarding the motivation for this problem is in this [technical rep
 
 ### Annotations
 
-  We manually annotated retrieval results for the six languages from 99 general [queries](resources/queries.csv). This dataset is used as groundtruth data for evaluation _only_. Please reference [this paper][paper] for further details on the annotation process.
+  We manually annotated retrieval results for the six languages from 99 general [queries](resources/queries.csv). This dataset is used as groundtruth data for evaluation _only_. Please refer to [this paper][paper] for further details on the annotation process.
 
 
 ## Setup
@@ -102,8 +105,17 @@ More context regarding the motivation for this problem is in this [technical rep
       This will build Docker containers and download the datasets.  By default, the data is downloaded into the `resources/data/` folder inside this repository, with the directory structure described [here](resources/README.md).
 
   **The datasets you will download (most of them compressed) have a combined size of only ~ 3.5 GB.**
+  
+  3.  To start the Docker container, run `script/console`:
+      ```
+      script/console
+      ```
+      This will land you inside the Docker container, starting in the `/src` directory. You can detach from/attach to this container to pause/continue your work.
+ 
 
-  For more about the data, see [Data Details](#data-details) below as well as [this notebook](notebooks/ExploreData.ipynb).
+  **The datasets you will download (most of them compressed) have a combined size of only ~ 3.5 GB.** 
+
+  For more about the data, see [Data Details](#data-details) below, as well as [this notebook](notebooks/ExploreData.ipynb).
 
 
 # Data Details
@@ -219,7 +231,7 @@ Code, comments, and docstrings are extracted in a language-specific manner, remo
 }
 ```
 
-Furthermore, summary statistics such as row counts and token length histograms can be found in [this notebook](notebooks/ExploreData.ipynb)
+Summary statistics such as row counts and token length histograms can be found in [this notebook](notebooks/ExploreData.ipynb)
 
 ## Downloading Data from S3
 
@@ -236,9 +248,9 @@ For example, the link for the `java` is:
 The size of the dataset is approximately 20 GB.  The various files and the directory structure are explained [here](resources/README.md).
 
 
-# Running our Baseline Model
+# Running Our Baseline Model
 
-Warning: the scripts provided to reproduce our baseline model take more than 24 hours on an [AWS P3-V100](https://aws.amazon.com/ec2/instance-types/p3/) instance.
+We encourage you to reproduce and extend these models, though most variants take several hours to train (and some take more than 24 hours on an [AWS P3-V100](https://aws.amazon.com/ec2/instance-types/p3/) instance).
 
 ## Model Architecture
 
@@ -258,9 +270,9 @@ This step assumes that you have a suitable Nvidia-GPU with [Cuda v9.0](https://d
       ```
       script/console
       ```
-      This will drop you into the shell of a Docker container with all necessary dependencies installed, including the code in this repository, along with data that you downloaded in the previous step.  By default you will be placed in the `src/` folder of this GitHub repository.  From here you can execute commands to run the model.
+      This will drop you into the shell of a Docker container with all necessary dependencies installed, including the code in this repository, along with data that you downloaded earlier.  By default you will be placed in the `src/` folder of this GitHub repository.  From here you can execute commands to run the model.
 
-  2. Set up [W&B](https://docs.wandb.com/docs/started.html) (free for open source projects) per the instructions below if you would like to share your results on the community benchmark.  This is optional but highly recommended.
+  2. Set up [W&B](https://docs.wandb.com/docs/started.html) (free for open source projects) [per the instructions below](#W&B Setup) if you would like to share your results on the community benchmark.  This is optional but highly recommended.
 
   3. The entry point to this model is `src/train.py`.  You can see various options by executing the following command:
       ```
@@ -277,7 +289,7 @@ This step assumes that you have a suitable Nvidia-GPU with [Cuda v9.0](https://d
       python train.py --model neuralbow
       ```
 
-    The above command will assume default values for the location(s) of the training data and a destination where would like to save the output model.  The default location for training data is specified in `/src/data_dirs_{train,valid,test}.txt`.  These files each contain a list of paths where data for the corresponding partition exists. If more than one path specified (separated by a newline), the data from all the paths will be concatenated together.  For example, this is the content of `src/data_dirs_train.txt`:
+    The above command will assume default values for the location(s) of the training data and a destination where you would like to save the output model.  The default location for training data is specified in `/src/data_dirs_{train,valid,test}.txt`.  These files each contain a list of paths where data for the corresponding partition exists. If more than one path specified (separated by a newline), the data from all the paths will be concatenated together.  For example, this is the content of `src/data_dirs_train.txt`:
 
     ```
     $ cat data_dirs_train.txt
@@ -301,18 +313,15 @@ This step assumes that you have a suitable Nvidia-GPU with [Cuda v9.0](https://d
 Additional notes:
 * Options for `--model` are currently listed in `src/model_restore_helper.get_model_class_from_name`.
 
-* Hyperparameters are specific to the respective model/encoder classes; a simple trick to discover them is to kick off a run without specifying hyperparameter choices, as that will print a list of all used hyperparameters with their default values (in JSON format).
-
-* By default, models are saved in the `/resources/saved_models` folder of this repository, but this can be overridden as shown above.
-
+* Hyperparameters are specific to the respective model/encoder classes. A simple trick to discover them is to kick off a run without specifying hyperparameter choices, as that will print a list of all used hyperparameters with their default values (in JSON format).
 
 # References
 
 ## Benchmark
 
-  We are using a community benchmark for this project to encourage collaboration and improve reproducibility.  It is hosted by [Weights & Biases](https://www.wandb.com/) (W&B), which is free for open source projects.  Our entries in the benchmark link to detailed logs of our training and evaluation metrics, as well as model artifacts, and we encourage other participants to provide as much transparency as possible.
+  We are using a community benchmark for this project to encourage collaboration and improve reproducibility.  It is hosted by [Weights & Biases](https://www.wandb.com/) (W&B), which is free for open source projects.  Our entries in the benchmark link to detailed logs of our training and evaluation metrics, as well as model artifacts, and we encourage other participants to provide as much detail as possible.
 
-  We invite the community to submit their runs to this benchmark to facilitate transperency by following [these instructions](src/docs/BENCHMARK.md).
+  We invite the community to submit their runs to this benchmark to facilitate transparency by following [these instructions](BENCHMARK.md).
 
 ## How to Contribute
 
@@ -329,7 +338,7 @@ Additional notes:
 
    1. Navigate to the `/src` directory in this repository.
 
-   2. If it's your first time using W&B on a machine, you will need to login:
+   2. If it's your first time using W&B on a machine, you will need to log in:
 
       ```
       $ wandb login
