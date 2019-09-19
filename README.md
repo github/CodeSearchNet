@@ -79,7 +79,7 @@ More context regarding the motivation for this problem is in [this paper][paper]
       ```
       This will build Docker containers and download the datasets.  By default, the data is downloaded into the `resources/data/` folder inside this repository, with the directory structure described [here](resources/README.md).
 
-  **The datasets you will download (most of them compressed) have a combined size of only ~ 3.5 GB.** 
+  **The datasets you will download (most of them compressed) have a combined size of only ~ 3.5 GB.**
 
   For more about the data, see [Data Details](#data-details) below as well as [this notebook](notebooks/ExploreData.ipynb).
 
@@ -229,6 +229,8 @@ Make sure you have [Docker](https://docs.docker.com/get-started/) and [Nvidia-Do
   # (this will land you inside the Docker container, starting in the /src directory--you can detach from/attach to this container to pause/continue your work)
   cd CodeSearchNet/
   script/setup
+  # this will drop you into the shell inside a docker container.
+  script/console
   # optional: log in to W&B to see your training metrics, track your experiments, and submit your models to the community benchmark
   wandb login
   # verify your setup by training a tiny model
@@ -253,7 +255,7 @@ Once you're satisfied with a new model, test it against the CodeSearchNet Challe
   The query has a single encoder, whereas each programming language has its own encoder. The available encoders are Neural-Bag-Of-Words, RNN, 1D-CNN, Self-Attention (BERT), and a 1D-CNN+Self-Attention Hybrid.
 
   The diagram below illustrates the general architecture of our baseline models:
-  
+
   ![alt text](images/architecture.png "Architecture")
 
 ## Training
@@ -321,7 +323,7 @@ Additional notes:
   We invite the community to submit their runs to this benchmark to facilitate transperency by following [these instructions](src/docs/BENCHMARK.md).
 
 ## How to Contribute
-  
+
   We anticipate that the community will design custom architectures and use frameworks other than Tensorflow.  Furthermore, we anticipate that additional datasets will be useful.  It is not our intention to integrate these models, approaches, and datasets into this repository as a superset of all available ideas.  Rather, we intend to maintain the baseline models and links to the data in this repository as a central place of reference.  We are accepting PRs that update the documentation, link to your project(s) with improved benchmarks, fix bugs, or make minor improvements to the code.  Here are [more specific guidelines for contributing to this repository](CONTRIBUTING.md); note particularly our [Code of Conduct](CODE_OF_CONDUCT.md).  Please open an issue if you are unsure of the best course of action.  
 
 ## Other READMEs
