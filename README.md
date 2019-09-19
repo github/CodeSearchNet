@@ -10,6 +10,7 @@
 
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
+- [Quickstart](#quickstart)
 - [Introduction](#introduction)
 	- [Project Overview](#project-overview)
 	- [Data](#data)
@@ -21,7 +22,6 @@
 	- [Schema & Format](#schema-format)
 	- [Downloading Data from S3](#downloading-data-from-s3)
 - [Running our Baseline Model](#running-our-baseline-model)
-	- [Quickstart](#quickstart)
 	- [Model Architecture](#model-architecture)
 	- [Training](#training)
 - [References](#references)
@@ -33,9 +33,32 @@
 
 <!-- /TOC -->
 
-# QuickStart: Training Baseline Models
+# Quickstart
 
-Want to jump right into training our baseline model?  Head [here](#quickstart).
+**If this is your first time reading this, we recommend skipping this section and reading the following sections.** The below commands assume you have [Docker](https://docs.docker.com/get-started/) and [Nvidia-Docker](https://github.com/NVIDIA/nvidia-docker), as well as GPU that supports [CUDA 9.0](https://developer.nvidia.com/cuda-90-download-archive) or greater. Note: you should only have to run `script/setup` once to download the data.
+
+  ```bash
+  # clone this repository
+  git clone https://github.com/ml-msr-github/CodeSearchNet.git
+  # download data (~3.5GB) from S3; build and run Docker container
+  # (this will land you inside the Docker container, starting in the /src directory--you can detach from/attach to this container to pause/continue your work)
+  cd CodeSearchNet/
+  script/setup # you should only have to run this script once.
+  # this will drop you into the shell inside a docker container.
+  script/console
+  # optional: log in to W&B to see your training metrics, track your experiments, and submit your models to the community benchmark
+  wandb login
+  # verify your setup by training a tiny model
+  python train.py --testrun
+  # see other command line options, try a full training run, and explore other model variants by extending this baseline training script example
+  python train.py --help
+  python train.py
+
+  # generate predictions for model evaluation
+  python predict.py [-r | --wandb_run_id] github/codesearchnet/0123456 # this is the org/project_name/run_id
+  ```
+
+Finally, you can submit your run to the [community benchmark](https://app.wandb.ai/github/codesearchnet/benchmark) by following these [instructions](src/docs/BENCHMARK.md).
 
 # Introduction
 
@@ -50,7 +73,7 @@ Want to jump right into training our baseline model?  Head [here](#quickstart).
 
 We hope that CodeSearchNet is a step towards engaging with the broader machine learning and NLP community regarding the relationship between source code and natural language. We describe a specific task here, but we expect and welcome other uses of our dataset.
 
-More context regarding the motivation for this problem is in [this paper][paper].
+More context regarding the motivation for this problem is in this [technical report][paper].
 
 ## Data
 
@@ -217,36 +240,6 @@ The size of the dataset is approximately 20 GB.  The various files and the direc
 # Running our Baseline Model
 
 Warning: the scripts provided to reproduce our baseline model take more than 24 hours on an [AWS P3-V100](https://aws.amazon.com/ec2/instance-types/p3/) instance.
-
-## Quickstart
-
-Make sure you have [Docker](https://docs.docker.com/get-started/) and [Nvidia-Docker](https://github.com/NVIDIA/nvidia-docker) (for GPU-compute related dependencies) installed. You should only have to perform the setup steps once to prepare the environment and download the data.
-
-  ```bash
-  # clone this repository
-  git clone https://github.com/ml-msr-github/CodeSearchNet.git
-  # download data (~3.5GB) from S3; build and run Docker container
-  # (this will land you inside the Docker container, starting in the /src directory--you can detach from/attach to this container to pause/continue your work)
-  cd CodeSearchNet/
-  script/setup
-  # this will drop you into the shell inside a docker container.
-  script/console
-  # optional: log in to W&B to see your training metrics, track your experiments, and submit your models to the community benchmark
-  wandb login
-  # verify your setup by training a tiny model
-  python train.py --testrun
-  # see other command line options, try a full training run, and explore other model variants by extending this baseline training script example
-  python train.py --help
-  python train.py
-  ```
-
-Once you're satisfied with a new model, test it against the CodeSearchNet Challenge. This will generate a CSV file of model prediction scores which you can then submit to the Weights & Biases [community benchmark](https://app.wandb.ai/github/codesearchnet/benchmark) by [following these instructions](src/docs/BENCHMARK.md).
-
-  ```bash
-  python predict.py [-r | --wandb_run_id] github/codesearchnet/0123456
-  # or
-  python predict.py [-m | --model_file] ../resources/saved_models/*.pkl.gz
-  ```
 
 ## Model Architecture
 
