@@ -1,0 +1,27 @@
+# ts
+**/node_modules/
+/webroot/scripts/*.js
+
+# vim
+**/*.swp
+
+# python
+**/*.pyc
+**/__pycache__/
+
+# jupyter
+**/.ipynb_checkpoints/
+
+# data
+resources/
+!resources/README.md
+!tests/data/
+*.csv
+
+# environment
+*.ftpconfig
+
+.idea
+/src/wandb/run-*
+/src/wandb/debug.log
+*.html

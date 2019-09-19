@@ -1,0 +1,6 @@
+../resources/data/python/final/jsonl/train
+../resources/data/javascript/final/jsonl/train
+../resources/data/java/final/jsonl/train
+../resources/data/php/final/jsonl/train
+../resources/data/ruby/final/jsonl/train
+../resources/data/go/final/jsonl/train

@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -e
+cd $(dirname "$0")/..
+
+docker run -p 8888:8888 -v $(pwd):/src/function-parser function-parser

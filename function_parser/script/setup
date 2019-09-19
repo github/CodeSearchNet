@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -e
+cd $(dirname "$0")/..
+
+mkdir -p data
+cd data
+wget https://zenodo.org/record/2536573/files/Libraries.io-open-data-1.4.0.tar.gz
+tar -zxvf Libraries.io-open-data-1.4.0.tar.gz
+cd ..

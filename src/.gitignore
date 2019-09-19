@@ -1,0 +1,7 @@
+azure_auth.json
+.idea
+*.pkl.gz
+*.pkl
+*.train_log
+.pt_description_history
+wandb-debug.log

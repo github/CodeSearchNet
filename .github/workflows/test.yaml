@@ -1,0 +1,76 @@
+name: Smoke Test
+on: push
+
+# split into two jobs so it runs in parallel, even if a little redundant
+jobs:
+  docker_build:
+    name: Build Test Container
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Copy Repo Files
+      uses: actions/checkout@master
+      
+    - name: docker build
+      run: | 
+        echo ${INPUT_PASSWORD} | docker login -u ${INPUT_USERNAME} --password-stdin
+        cd $GITHUB_WORKSPACE
+        docker pull github/csnet-smoketest
+        docker build --cache-from github/csnet-smoketest -t github/csnet-smoketest -f docker/docker-cpu.Dockerfile .
+        docker push github/csnet-smoketest
+      env:
+        INPUT_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        INPUT_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+   
+  basic_tests:
+    needs: docker_build
+    name: Integration Test Default Parameters
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: mypy type checking
+      run: |
+        cd $GITHUB_WORKSPACE
+        docker run github/csnet-smoketest mypy --ignore-missing-imports --follow-imports skip /src/train.py /src/model_test.py
+      
+    - name: neuralbow, all languages
+      run: |
+        cd $GITHUB_WORKSPACE
+        docker run github/csnet-smoketest python train.py /src /tests/data/data_train.txt /tests/data/data_train.txt /tests/data/data_train.txt --dryrun --max-num-epochs 1 --model neuralbow
+      
+    - name: --max-files-per-dir 2
+      run: |
+        cd $GITHUB_WORKSPACE 
+        docker run github/csnet-smoketest python train.py /src /tests/data/data_train.txt /tests/data/data_train.txt /tests/data/data_train.txt --dryrun --max-num-epochs 1 --max-files-per-dir 2
+  
+  CNN:
+    needs: docker_build
+    name: 1DCNN
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 1dcnn, all languages
+      run: |
+        cd $GITHUB_WORKSPACE
+        docker run github/csnet-smoketest python train.py /src /tests/data/data_train.txt /tests/data/data_train.txt /tests/data/data_train.txt --dryrun --max-num-epochs 1 --model 1dcnn
+
+  selfattn:
+    needs: docker_build
+    name: selfattn
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: selfattn, all languages
+      run: |
+        cd $GITHUB_WORKSPACE
+        docker run github/csnet-smoketest python train.py /src /tests/data/data_train.txt /tests/data/data_train.txt /tests/data/data_train.txt --dryrun --max-num-epochs 1 --model selfatt --hypers-override "{\"batch_size\":64}"
+
+  rnn:
+    needs: docker_build
+    name: rnn
+    runs-on: ubuntu-latest
+    steps:
+    - name: rnn, all languages
+      run: |
+        cd $GITHUB_WORKSPACE
+        docker run github/csnet-smoketest python train.py /src /tests/data/data_train.txt /tests/data/data_train.txt /tests/data/data_train.txt --dryrun --max-num-epochs 1 --model rnn

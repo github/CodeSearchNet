@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -e
+
+cd /home/dev/script/
+rm -rf ../resources/data
+
+python download_dataset.py ../resources/data

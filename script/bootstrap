@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -e
+cd $(dirname "$0")/..
+
+docker build -f docker/preprocessing.Dockerfile -t preprocessing .
+
+# try to build container locally.  If fails pull from DockerHub.
+if docker build -f docker/docker-gpu.Dockerfile -t csnet:gpu . 2>/dev/null; then
+    echo "built image csnet:gpu locally."
+else
+    echo "local build failed, pulling image from DockerHub instead"
+    docker pull github/csnet:gpu
+    docker tag github/csnet:gpu csnet:gpu
+fi

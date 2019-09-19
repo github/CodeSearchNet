@@ -1,0 +1,11 @@
+docopt
+dpu_utils
+more-itertools
+numpy
+scipy
+SetSimilaritySearch
+wandb
+pygments
+parso
+pandas
+toolz
