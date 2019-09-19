@@ -40,22 +40,21 @@
   ```bash
   # clone this repository
   git clone https://github.com/ml-msr-github/CodeSearchNet.git
-  # download data (~3.5GB) from S3; build and run Docker container
-  # (this will land you inside the Docker container, starting in the /src directory--you can detach from/attach to this container to pause/continue your work)
   cd CodeSearchNet/
-  script/setup # you should only have to run this script once.
+  # download data (~3.5GB) from S3; build and run Docker container
+  script/setup
   # this will drop you into the shell inside a docker container.
   script/console
-  # optional: log in to W&B to see your training metrics, track your experiments, and submit your models to the community benchmark
+  # optional: log in to W&B to track your experiments, and submit your results to the benchmark
   wandb login
   # verify your setup by training a tiny model
   python train.py --testrun
-  # see other command line options, try a full training run, and explore other model variants by extending this baseline training script example
+  # see other command line options and try a full training run with default values
   python train.py --help
   python train.py
 
   # generate predictions for model evaluation
-  python predict.py [-r | --wandb_run_id] github/codesearchnet/0123456 # this is the org/project_name/run_id
+  python predict.py -r github/codesearchnet/0123456 # this is the org/project_name/run_id
   ```
 
 Finally, you can submit your run to the [community benchmark](https://app.wandb.ai/github/codesearchnet/benchmark) by following these [instructions](src/docs/BENCHMARK.md).
