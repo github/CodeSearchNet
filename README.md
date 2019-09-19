@@ -112,9 +112,6 @@ More context regarding the motivation for this problem is in this [technical rep
       ```
       This will land you inside the Docker container, starting in the `/src` directory. You can detach from/attach to this container to pause/continue your work.
  
-
-  **The datasets you will download (most of them compressed) have a combined size of only ~ 3.5 GB.** 
-
   For more about the data, see [Data Details](#data-details) below, as well as [this notebook](notebooks/ExploreData.ipynb).
 
 
