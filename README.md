@@ -35,7 +35,7 @@
 
 # Quickstart
 
-**If this is your first time reading this, we recommend skipping this section and reading the following sections.** The below commands assume you have [Docker](https://docs.docker.com/get-started/) and [Nvidia-Docker](https://github.com/NVIDIA/nvidia-docker), as well as GPU that supports [CUDA 9.0](https://developer.nvidia.com/cuda-90-download-archive) or greater. Note: you should only have to run `script/setup` once to download the data.
+**If this is your first time reading this, we recommend skipping this section and reading the following sections.** The below commands assume you have [Docker](https://docs.docker.com/get-started/) and [Nvidia-Docker](https://github.com/NVIDIA/nvidia-docker), as well as a GPU that supports [CUDA 9.0](https://developer.nvidia.com/cuda-90-download-archive) or greater. Note: you should only have to run `script/setup` once to download the data.
 
   ```bash
   # clone this repository
