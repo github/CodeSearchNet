@@ -70,7 +70,7 @@ or by selecting a run from the runs table:
 
 ### Result evaluation
 
-Once you upload your \`model_predictions.csv\` file, W&B will compute the normalized discounted cumulative gain (NDCG) of your model's predictions against the human-annotated relevance scores.  Further details on the evaluation process and metrics are in the [the root README](README.md). For transparency, we include the script used to evaluate submissions: [src/relevanceeval.py](src/relevanceeval.py)
+Once you upload your \`model_predictions.csv\` file, W&B will compute the normalized discounted cumulative gain (NDCG) of your model's predictions against the human-annotated relevance scores.  Further details on the evaluation process and metrics are in [the root README](README.md). For transparency, we include the script used to evaluate submissions: [src/relevanceeval.py](src/relevanceeval.py)
 
 
 ### Training the baseline model (optional)
