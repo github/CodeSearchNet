@@ -59,7 +59,7 @@ RUN pip --no-cache-dir install --upgrade \
     toolz==0.10.0 \
     tqdm==4.34.0 \
     typed_ast==1.4.0 \
-    wandb==0.8.11 \
+    wandb==0.8.12 \
     wget==3.2
 
 ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
