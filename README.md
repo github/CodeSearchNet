@@ -85,7 +85,7 @@ More context regarding the motivation for this problem is in this [technical rep
 
 ## Evaluation
 
-  The metric we use for evaluation is [Normalized Discounted Cumalitive Gain](https://en.wikipedia.org/wiki/Discounted_cumulative_gain#Normalized_DCG).  Please reference [this paper][paper] for further details regarding model evaluation.
+  The metric we use for evaluation is [Normalized Discounted Cumulative Gain](https://en.wikipedia.org/wiki/Discounted_cumulative_gain#Normalized_DCG).  Please reference [this paper][paper] for further details regarding model evaluation.
 
 ### Annotations
 

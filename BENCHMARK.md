@@ -1,13 +1,13 @@
 ## Submitting runs to the benchmark
 
-The Weights & Biases (W&B) benchmark  tracks and compares models trained on the CodeSearchNet dataset by the global machine learning research community. Anyone is welcome to submit their results for review.
+The [Weights & Biases (W&B)](https://www.wandb.com) [benchmark](https://app.wandb.ai/github/codesearchnet/benchmark) tracks and compares models trained on the CodeSearchNet dataset by the global machine learning research community. Anyone is welcome to submit their results for review.
 
 ## Submission process
 
 ### Requirements
 
 There are a few requirements for submitting a model to the benchmark.
-- You must a have a run logged to [W&B](https://app.wandb.ai)
+- You must a have a run logged to [W&B](https://app.wandb.ai).
 - Your run must have attached inference results in a file named  `model_predictions.csv`. You can view all the files attached to a given run in the browser by clicking the "Files" icon from that run's main page. 
 - The schema outlined in the submission format section below must be strictly followed. 
 
@@ -20,11 +20,11 @@ A valid submission to the CodeSeachNet Challenge requires a file named **model_p
 * `identifier`: this is an optional field that can help you track your data
 * `url`: the unique GitHub URL to the returned results, e.g. "https://github.com/JamesClonk/vultr/blob/fed59ad207c9bda0a5dfe4d18de53ccbb3d80c91/cmd/commands.go#L12-L190" . This information is available as a field in the data to be scored.
       
-For further background and instructions on the submission process, see the root README.
+For further background and instructions on the submission process, see [the root README](README.md).
 
 The row order corresponds to the result ranking in the search task. For example, if in row 5 there is an entry for the Python query "read properties file", and in row 60 another result for the Python query "read properties file", then the URL in row 5 is considered to be ranked higher than the URL in row 60 for that query and language.
 
-The script we used to create the baseline submission is [src/predict.py](src/predict.py).  You are not required to use this script to produce your submission file -- we only provide it for reference.
+The script we used to create the baseline submission is [src/predict.py](src/predict.py).  You are not required to use this script to produce your submission file; we only provide it for reference.
 
 Here is an example: 
 
@@ -49,12 +49,12 @@ You can submit your results to the benchmark as follows:
 2. Generate your own file of model predictions following the format above and name it \`model_predictions.csv\`.
 3. Upload a run to wandb with this \`model_predictions.csv\` file attached.
 
-Our example script [src/predict.py](src/predict.py) takes care of steps 2 and 3 for a model whose training run has been logged to W&B, given the corresponding W&B run id, which you can find on the /overview page in the browser or by clicking the 'info' icon on a given run.
+Our example script [src/predict.py](src/predict.py) takes care of steps 2 and 3 for a model training run that has already been logged to W&B, given the corresponding W&B run id, which you can find on the /overview page in the browser or by clicking the 'info' icon on a given run.
 
 Here is a short example script that will create a run in W&B and perform the upload (step 3) for a local file of predictions:
 ```python
 import wandb
-wandb.init(project="codesearchnet", resume="must")
+wandb.init(project="codesearchnet")
 wandb.save('model_predictions.csv')
 ```
 
@@ -70,11 +70,11 @@ or by selecting a run from the runs table:
 
 ### Result evaluation
 
-Once you upload your \`model_predictions.csv\` file, W&B will compute the normalized cumulative gain (NCG) of your model's predictions against the human-annotated relevance scores.  Further details on the evaluation process and metrics are in the root README. For transparency, we include the script used to evaluate submissions: [src/relevanceeval.py](src/relevanceeval.py)
+Once you upload your \`model_predictions.csv\` file, W&B will compute the normalized discounted cumulative gain (NDCG) of your model's predictions against the human-annotated relevance scores.  Further details on the evaluation process and metrics are in the [the root README](README.md). For transparency, we include the script used to evaluate submissions: [src/relevanceeval.py](src/relevanceeval.py)
 
 
 ### Training the baseline model (optional)
 
-Replicating our results for the CodeSearchNet baseline is optional, as we encourage the community to create their own models and methods for ranking search results.  To replicate our baseline submission, you can start with the instructions in the [CodeSearchNet GitHub repository](https://github.com/ml-msr-github/CodeSearchNet).  This baseline model uses [src/predict.py](src/predict.py) to generate the submission file.
+Replicating our results for the CodeSearchNet baseline is optional, as we encourage the community to create their own models and methods for ranking search results.  To replicate our baseline submission, you can start with the instructions in the [CodeSearchNet GitHub repository](https://github.com/github/CodeSearchNet).  This baseline model uses [src/predict.py](src/predict.py) to generate the submission file.
 
 Your run will be logged to W&B, within a project that will be automatically linked to this benchmark.
