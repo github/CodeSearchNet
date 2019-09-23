@@ -2,9 +2,7 @@
  [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)  [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![Weights-And-Biases](https://img.shields.io/badge/Weights%20&%20Biases-black.svg?logo=google-analytics)](https://app.wandb.ai/github/codesearchnet/benchmark)
 
-**TODO: Update Paper Link **
-
-[paper]: https://ml4code.github.io/
+[paper]: https://arxiv.org/abs/1909.09436
 
 **Table of Contents**
 
