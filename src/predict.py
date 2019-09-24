@@ -30,8 +30,8 @@ Note that this takes around 2 hours to make predictions on the baseline model.
 This script generates ranking results over the CodeSearchNet corpus for a given model by scoring their relevance
 (using that model) to 99 search queries of the CodeSearchNet Challenge. We use cosine distance between the learned 
 representations of the natural language queries and the code, which is stored in jsonlines files with this format:
-https://github.com/ml-msr-github/CodeSearchNet#preprocessed-data-format. The 99 challenge queries are located in 
-this file: https://github.com/ml-msr-github/CodeSearchNet/blob/master/resources/queries.csv. 
+https://github.com/github/CodeSearchNet#preprocessed-data-format. The 99 challenge queries are located in 
+this file: https://github.com/github/CodeSearchNet/blob/master/resources/queries.csv. 
 To download the full CodeSearchNet corpus, see the README at the root of this repository.
 
 Note that this script is specific to methods and code in our baseline model and may not generalize to new models. 
