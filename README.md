@@ -37,7 +37,7 @@
 
   ```bash
   # clone this repository
-  git clone https://github.com/ml-msr-github/CodeSearchNet.git
+  git clone https://github.com/github/CodeSearchNet.git
   cd CodeSearchNet/
   # download data (~3.5GB) from S3; build and run the Docker container
   script/setup
