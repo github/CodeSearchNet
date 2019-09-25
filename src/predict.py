@@ -111,7 +111,7 @@ if __name__ == '__main__':
         indexes = [{'code_tokens': d['function_tokens'], 'language': d['language']} for d in tqdm(definitions)]
         code_representations = model.get_code_representations(indexes)
 
-        indices = AnnoyIndex(code_representations[0].shape[0])
+        indices = AnnoyIndex(code_representations[0].shape[0], 'angular')
         for index, vector in tqdm(enumerate(code_representations)):
             if vector is not None:
                 indices.add_item(index, vector)
