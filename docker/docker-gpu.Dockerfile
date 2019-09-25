@@ -49,7 +49,7 @@ RUN pip --no-cache-dir install --upgrade \
     jsonpath_rw_ext==1.2.2 \
     jupyter==1.0.0 \
     more_itertools==7.2.0 \
-    numpy==1.17.0 \
+    numpy==1.16.5 \
     pandas==0.25.0 \
     parso==0.5.1 \
     pygments==2.4.2 \
