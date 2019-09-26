@@ -50,6 +50,7 @@ The row order corresponds to the result ranking in the search task. For example,
 
 import pickle
 import re
+import shutil
 import sys
 
 from annoy import AnnoyIndex
@@ -88,12 +89,14 @@ if __name__ == '__main__':
             sys.exit(1)
         wandb_api = wandb.Api()
         # retrieve saved model from W&B for this run
+        print("Fetching run from W&B...")
         try:
             run = wandb_api.run(args_wandb_run_id)
         except wandb.CommError as e:
             print("ERROR: Problem querying W&B for wandb_run_id: %s" % args_wandb_run_id, file=sys.stderr)
             sys.exit(1)
 
+        print("Fetching run files from W&B...")
         gz_run_files = [f for f in run.files() if f.name.endswith('gz')]
         if not gz_run_files:
             print("ERROR: Run contains no model-like files")
@@ -129,10 +132,18 @@ if __name__ == '__main__':
     df = pd.DataFrame(predictions, columns=['query', 'language', 'identifier', 'url'])
     df.to_csv(predictions_csv, index=False)
 
+
     if run_id:
+        print('Uploading predictions to W&B')
         # upload model predictions CSV file to W&B
 
         # we checked that there are three path components above
         entity, project, name = args_wandb_run_id.split('/')
+
+        # make sure the file is in our cwd, with the correct name
+        predictions_base_csv = "model_predictions.csv"
+        shutil.copyfile(predictions_csv, predictions_base_csv)
+
+        # Using internal wandb API. TODO: Update when available as a public API
         internal_api = InternalApi()
-        internal_api.push([predictions_csv], run=name, entity=entity, project=project)
+        internal_api.push([predictions_base_csv], run=name, entity=entity, project=project)
