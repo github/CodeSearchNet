@@ -49,7 +49,7 @@ You can submit your results to the benchmark as follows:
 2. Generate your own file of model predictions following the format above and name it \`model_predictions.csv\`.
 3. Upload a run to wandb with this \`model_predictions.csv\` file attached.
 
-Our example script [src/predict.py](src/predict.py) takes care of steps 2 and 3 for a model whose training run has been logged to W&B, given the corresponding W&B run id, which you can find on the /overview page in the browser or by clicking the 'info' icon on a given run.
+Our example script [src/predict.py](src/predict.py) takes care of steps 2 and 3 for a model training run that has already been logged to W&B, given the corresponding W&B run id, which you can find on the /overview page in the browser or by clicking the 'info' icon on a given run.
 ```
 
 ### Publishing your submission
