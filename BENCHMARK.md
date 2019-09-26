@@ -13,6 +13,8 @@ There are a few requirements for submitting a model to the benchmark.
 
 ### Submission format
 
+*To submit from our baseline model, skip to the [training the baseline model](#training-the-baseline-model-optional) section below.*
+
 A valid submission to the CodeSeachNet Challenge requires a file named **model_predictions.csv** with the following fields: `query`, `language`, `identifier`, and `url`:
 
 * `query`: the textual representation of the query, e.g. "int to string" .  
@@ -23,8 +25,6 @@ A valid submission to the CodeSeachNet Challenge requires a file named **model_p
 For further background and instructions on the submission process, see [the root README](README.md).
 
 The row order corresponds to the result ranking in the search task. For example, if in row 5 there is an entry for the Python query "read properties file", and in row 60 another result for the Python query "read properties file", then the URL in row 5 is considered to be ranked higher than the URL in row 60 for that query and language.
-
-The script we used to create the baseline submission is [src/predict.py](src/predict.py).  You are not required to use this script to produce your submission file; we only provide it for reference.
 
 Here is an example: 
 
@@ -50,12 +50,6 @@ You can submit your results to the benchmark as follows:
 3. Upload a run to wandb with this \`model_predictions.csv\` file attached.
 
 Our example script [src/predict.py](src/predict.py) takes care of steps 2 and 3 for a model training run that has already been logged to W&B, given the corresponding W&B run id, which you can find on the /overview page in the browser or by clicking the 'info' icon on a given run.
-
-Here is a short example script that will create a run in W&B and perform the upload (step 3) for a local file of predictions:
-```python
-import wandb
-wandb.init(project="codesearchnet")
-wandb.save('model_predictions.csv')
 ```
 
 ### Publishing your submission
@@ -65,7 +59,7 @@ You've now generated all the content required to submit a run to the CodeSearchN
 You can submit your runs by visiting the run page and clicking on the overview tab:
 ![](https://github.com/wandb/core/blob/master/frontends/app/src/assets/run-page-benchmark.png?raw=true)
 
-or by selecting a run from the runs table:
+or by visiting the project page and selecting a run from the runs table:
 ![](https://app.wandb.ai/static/media/submit_benchmark_run.e286da0d.png)
 
 ### Result evaluation
@@ -75,6 +69,6 @@ Once you upload your \`model_predictions.csv\` file, W&B will compute the normal
 
 ### Training the baseline model (optional)
 
-Replicating our results for the CodeSearchNet baseline is optional, as we encourage the community to create their own models and methods for ranking search results.  To replicate our baseline submission, you can start with the instructions in the [CodeSearchNet GitHub repository](https://github.com/github/CodeSearchNet).  This baseline model uses [src/predict.py](src/predict.py) to generate the submission file.
+Replicating our results for the CodeSearchNet baseline is optional, as we encourage the community to create their own models and methods for ranking search results.  To replicate our baseline submission, you can start with the "Quickstart" instructions in the [CodeSearchNet GitHub repository](https://github.com/github/CodeSearchNet).  This baseline model uses [src/predict.py](src/predict.py) to generate the submission file.
 
 Your run will be logged to W&B, within a project that will be automatically linked to this benchmark.
