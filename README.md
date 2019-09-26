@@ -267,7 +267,7 @@ This step assumes that you have a suitable Nvidia-GPU with [Cuda v9.0](https://d
       ```
       This will drop you into the shell of a Docker container with all necessary dependencies installed, including the code in this repository, along with data that you downloaded earlier.  By default you will be placed in the `src/` folder of this GitHub repository.  From here you can execute commands to run the model.
 
-  2. Set up [W&B](https://docs.wandb.com/docs/started.html) (free for open source projects) [per the instructions below](#W&B Setup) if you would like to share your results on the community benchmark.  This is optional but highly recommended.
+  2. Set up [W&B](https://docs.wandb.com/docs/started.html) (free for open source projects) [per the instructions below](#wb-setup) if you would like to share your results on the community benchmark.  This is optional but highly recommended.
 
   3. The entry point to this model is `src/train.py`.  You can see various options by executing the following command:
       ```
