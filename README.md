@@ -1,6 +1,6 @@
 ![Tests](https://github.com/github/CodeSearchNet/workflows/Smoke%20Test/badge.svg)
  [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)  [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
-[![Weights-And-Biases](https://img.shields.io/badge/Weights%20&%20Biases-black.svg?logo=google-analytics)](https://app.wandb.ai/github/codesearchnet/benchmark)
+[![Weights-And-Biases](https://img.shields.io/badge/Weights%20&%20Biases-black.svg?logo=google-analytics)](https://app.wandb.ai/github/CodeSearchNet/benchmark)
 
 [paper]: https://arxiv.org/abs/1909.09436
 
@@ -55,10 +55,10 @@
   python train.py
 
   # generate predictions for model evaluation
-  python predict.py -r github/codesearchnet/0123456 # this is the org/project_name/run_id
+  python predict.py -r github/CodeSearchNet/0123456 # this is the org/project_name/run_id
   ```
 
-Finally, you can submit your run to the [community benchmark](https://app.wandb.ai/github/codesearchnet/benchmark) by following these [instructions](BENCHMARK.md).
+Finally, you can submit your run to the [community benchmark](https://app.wandb.ai/github/CodeSearchNet/benchmark) by following these [instructions](BENCHMARK.md).
 
 # Introduction
 
@@ -69,7 +69,7 @@ Finally, you can submit your run to the [community benchmark](https://app.wandb.
   1. Instructions for obtaining large corpora of relevant data
   2. Open source code for a range of baseline models, along with pre-trained weights
   3. Baseline evaluation metrics and utilities
-  4. Mechanisms to track progress on a [shared community benchmark](https://app.wandb.ai/github/codesearchnet/benchmark) hosted by [Weights & Biases](https://www.wandb.com/)
+  4. Mechanisms to track progress on a [shared community benchmark](https://app.wandb.ai/github/CodeSearchNet/benchmark) hosted by [Weights & Biases](https://www.wandb.com/)
 
 We hope that CodeSearchNet is a step towards engaging with the broader machine learning and NLP community regarding the relationship between source code and natural language. We describe a specific task here, but we expect and welcome other uses of our dataset.
 
