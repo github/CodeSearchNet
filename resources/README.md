@@ -74,4 +74,4 @@ Out[6]:
 
 ## Data Format
 
-See [this](docs/DATA_FORMAT.md) for documentation and an example of how the data is stored.
+See [this](https://github.com/github/CodeSearchNet#schema--format) for documentation and an example of how the data is stored.
