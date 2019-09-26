@@ -58,6 +58,7 @@ from dpu_utils.utils import RichPath
 import pandas as pd
 from tqdm import tqdm
 import wandb
+from wandb.apis import InternalApi
 
 from dataextraction.python.parse_python_data import tokenize_docstring_from_string
 import model_restore_helper
@@ -93,7 +94,11 @@ if __name__ == '__main__':
             print("ERROR: Problem querying W&B for wandb_run_id: %s" % args_wandb_run_id, file=sys.stderr)
             sys.exit(1)
 
-        model_file = [f for f in run.files() if f.name.endswith('gz')][0].download(replace=True)
+        gz_run_files = [f for f in run.files() if f.name.endswith('gz')]
+        if not gz_run_files:
+            print("ERROR: Run contains no model-like files")
+            sys.exit(1)
+        model_file = gz_run_files[0].download(replace=True)
         local_model_path = model_file.name
         run_id = args_wandb_run_id.split('/')[-1]
 
@@ -126,5 +131,8 @@ if __name__ == '__main__':
 
     if run_id:
         # upload model predictions CSV file to W&B
-        wandb.init(id=run_id, resume="must")
-        wandb.save(predictions_csv)
+
+        # we checked that there are three path components above
+        entity, project, name = args_wandb_run_id.split('/')
+        internal_api = InternalApi()
+        internal_api.push([predictions_csv], run=name, entity=entity, project=project)
