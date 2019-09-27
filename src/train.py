@@ -7,7 +7,7 @@ Usage:
 *_DATA_PATH arguments may either accept (1) directory filled with .jsonl.gz files that we use as data,
 or a (2) plain text file containing a list of such directories (used for multi-language training).
 
-In the case that you supply a (2) plain text file, all directory names must be seperated by a newline.
+In the case that you supply a (2) plain text file, all directory names must be separated by a newline.
 For example, if you want to read from multiple directories you might have a plain text file called
 data_dirs_train.txt with the below contents:
 
