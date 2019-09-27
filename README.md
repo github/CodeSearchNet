@@ -130,11 +130,11 @@ Data is stored in [jsonlines](http://jsonlines.org/) format.  Each line in the u
 - **language:** the programming language
 - **code:** the part of the `original_string` that is code
 - **code_tokens:** tokenized version of `code`
-- **docstring:** the top level comment or docstring, if exists in the original string
+- **docstring:** the top-level comment or docstring, if it exists in the original string
 - **docstring_tokens:** tokenized version of `docstring`
 - **sha:** this field is not being used [TODO: add note on where this comes from?]
 - **partition:** a flag indicating what partition this datum belongs to of {train, valid, test, etc.} This is not used by the model.  Instead we rely on directory structure to denote the partition of the data.
-- **url:** the url for the this code snippet including the line numbers
+- **url:** the url for the code snippet including the line numbers
 
 Code, comments, and docstrings are extracted in a language-specific manner, removing artifacts of that language.
 
@@ -265,7 +265,7 @@ This step assumes that you have a suitable Nvidia-GPU with [Cuda v9.0](https://d
       ```
       script/console
       ```
-      This will drop you into the shell of a Docker container with all necessary dependencies installed, including the code in this repository, along with data that you downloaded earlier.  By default you will be placed in the `src/` folder of this GitHub repository.  From here you can execute commands to run the model.
+      This will drop you into the shell of a Docker container with all necessary dependencies installed, including the code in this repository, along with data that you downloaded earlier.  By default, you will be placed in the `src/` folder of this GitHub repository.  From here you can execute commands to run the model.
 
   2. Set up [W&B](https://docs.wandb.com/docs/started.html) (free for open source projects) [per the instructions below](#wb-setup) if you would like to share your results on the community benchmark.  This is optional but highly recommended.
 
@@ -296,7 +296,7 @@ This step assumes that you have a suitable Nvidia-GPU with [Cuda v9.0](https://d
     ../resources/data/go/final/jsonl/train
     ```
 
-    By default models are saved in the `resources/saved_models` folder of this repository.
+    By default, models are saved in the `resources/saved_models` folder of this repository.
 
   * Training a 1D-CNN model on Python data only:
     ```

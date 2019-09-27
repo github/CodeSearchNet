@@ -6,7 +6,7 @@ Usage:
     dedup_split.py [options] INPUT_FILENAME OUTPUT_FOLDER
 
 Arguments:
-    INPUT_FOLDER               directory w/ compressed jsonl files that have a .jsonl.gz a file extenstion
+    INPUT_FOLDER               directory w/ compressed jsonl files that have a .jsonl.gz a file extension
     OUTPUT_FOLDER              directory where you want to save data to.
 
 Options:
