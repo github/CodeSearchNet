@@ -19,7 +19,7 @@ We anticipate that the community will design custom architectures and use framew
 
 - Bug fixes
 - Updates to documentation, including links to your project(s) where improvements to the baseline have been made
-- Minor improvements to the code
+- Minor improvements to the code (generally excluding changes regarding improvements to the model or preprocessing to this repository - file an issue to discuss ideas)
 
 Please open an issue if you are unsure regarding the best course of action.  
 
