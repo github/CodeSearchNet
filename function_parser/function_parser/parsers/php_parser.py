@@ -9,9 +9,10 @@ class PhpParser(LanguageParser):
     FILTER_PATHS = ('test', 'tests')
 
     BLACKLISTED_FUNCTION_NAMES = {'__construct', '__destruct', '__call', '__callStatic',
-                                  '__get', '__set', '__isset()', '__unset',
+                                  '__get', '__set', '__isset', '__unset',
                                   '__sleep', '__wakeup', '__toString', '__invoke',
-                                  '__set_state', '__clone', '__debugInfo'}
+                                  '__set_state', '__clone', '__debugInfo', '__serialize',
+                                  '__unserialize'}
 
     @staticmethod
     def get_docstring(trait_node, blob: str, idx: int) -> str:
@@ -62,7 +63,7 @@ class PhpParser(LanguageParser):
         for trait_declaration in trait_declarations:
             definitions.extend(PhpParser.get_declarations(trait_declaration, blob, trait_declaration.type))
         for class_declaration in class_declarations:
-            definitions.extend(PhpParser.get_declarations(class_declaration, blob, class_declaration.type))        
+            definitions.extend(PhpParser.get_declarations(class_declaration, blob, class_declaration.type))
         return definitions
 
 
