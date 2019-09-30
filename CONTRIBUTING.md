@@ -15,11 +15,14 @@ Please note that this project is released with a [Contributor Code of Conduct][c
 
 ## Scope
 
-We anticipate that the community will design custom architectures and use frameworks other than Tensorflow.  Furthermore, we anticipate that other datasets beyond the ones provided in this project might be useful.  It is not our intention to integrate the best models and datasets into this repository as a superset of all available ideas.  Rather, we intend to provide baseline approaches and a central place of reference with links to related repositories from the community.  Therefore, we are accepting pull requests for the following items:
+We want to use this repository to distribute the best data pre-processing and loading pipeline for the CodeSearchNet dataset.
+As we anticipate other data scientists and researchers to design many custom architectures and use frameworks other than Tensorflow, we do not want to update the models in this repository beyond the simple baselines we originally released.
+Therefore, we are accepting pull requests for the following items:
 
-- Bug fixes
-- Updates to documentation, including links to your project(s) where improvements to the baseline have been made
-- Minor improvements to the code (generally excluding changes regarding improvements to the model or preprocessing to this repository - file an issue to discuss ideas)
+- Improvements of the data pre-processing pipeline (e.g. better cleaning heuristics, new supported languages, etc.)
+- Documentation updates that help others use the dataset
+- Documentation updates with links to your project(s) where improvements to the baseline have been made
+- Bug fixes for bugs in the baseline models (i.e., not better hyperparameter settings)
 
 Please open an issue if you are unsure regarding the best course of action.  
 
