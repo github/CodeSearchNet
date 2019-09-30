@@ -16,7 +16,7 @@ Please note that this project is released with a [Contributor Code of Conduct][c
 ## Scope
 
 We want to use this repository to distribute the best data pre-processing and loading pipeline for the CodeSearchNet dataset.
-As anicipate other data scientists and researchers to design custom architectures and use frameworks other than Tensorflow, we do not want to update the models in this repository beyond the simple baselines we originally released.
+As we anticipate other data scientists and researchers to design many custom architectures and use frameworks other than Tensorflow, we do not want to update the models in this repository beyond the simple baselines we originally released.
 Therefore, we are accepting pull requests for the following items:
 
 - Improvements of the data pre-processing pipeline (e.g. better cleaning heuristics, new supported languages, etc.)
