@@ -60,13 +60,17 @@ class BpeVocabulary(typing.Sized):
         """
         for token, count in self.count_tokens(words).items():
             bp_counts = Counter()  # type: Counter
-            for ngram in token.split(' '):
+            sub_tokens = token.split(' ')
+            joined_tokens = ''.join(sub_tokens)
+            token_offsets = [0]
+            length = 0
+            for ngram in sub_tokens:
                 bp_counts[ngram] += count
-            for ngram_size in range(self.ngram_min, min([self.ngram_max, len(token)]) + 1):
-                ngrams = [''.join(ngram) for ngram in toolz.sliding_window(ngram_size, token.split(' '))]
-
-                for ngram in ngrams:
-                    bp_counts[''.join(ngram)] += count
+                length += len(ngram)
+                token_offsets += [length]
+            for ngram_size in range(self.ngram_min, min(self.ngram_max, len(sub_tokens)) + 1):
+                for i in range(len(sub_tokens) - ngram_size + 1):
+                    bp_counts[joined_tokens[token_offsets[i]:token_offsets[i+ngram_size]]] += count
 
             yield bp_counts
 
@@ -89,9 +93,7 @@ class BpeVocabulary(typing.Sized):
         for token in {self.SOW, self.EOW}:
             vocab[token] = int(2**63)
         for idx, byte_pair_count in enumerate(self.byte_pair_counts(words)):
-            for byte_pair, count in byte_pair_count.items():
-                vocab[byte_pair] += count
-
+            vocab.update(byte_pair_count)
             if (idx + 1) % 10000 == 0:
                 self.trim_vocab(10 * self.bpe_vocab_size, vocab)
 
