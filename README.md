@@ -17,7 +17,7 @@
 	- [Setup](#setup)
 - [Data Details](#data-details)
 	- [Data Acquisition](#data-acquisition)
-	- [Schema & Format](#schema-format)
+	- [Schema & Format](#schema--format)
 	- [Downloading Data from S3](#downloading-data-from-s3)
 - [Running our Baseline Model](#running-our-baseline-model)
 	- [Model Architecture](#model-architecture)
