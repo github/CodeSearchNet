@@ -15,6 +15,13 @@ jobs:
         echo "repo context: ${GITHUB_REPOSITORY}"
         echo "ref context: ${GITHUB_REF}"
         
+    - name: emit-output
+      uses: docker://hamelsmu/actions-impersonate
+      id: get_token
+      with:
+        APP_PEM: ${{ secrets.APP_PEM }}
+        APP_ID: ${{ secrets.APP_ID }}
+        
     - name: Greeting
       run: |
         URI=https://api.github.com
@@ -31,7 +38,7 @@ jobs:
       env:
         USER: ${{ github.event.pull_request.user.login }}
         ISSUE_NUMBER: ${{ github.event.pull_request.number }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TOKEN: ${{ steps.get_token.outputs.APP_INSTALLATION_TOKEN }}
   
     - name: Choose Reviewer Randomly
       run: |
@@ -54,4 +61,4 @@ jobs:
         "${URI}/repos/${GITHUB_REPOSITORY}/pulls/${PULL_NUMBER}/requested_reviewers"
       env:
         PULL_NUMBER: ${{ github.event.pull_request.number }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TOKEN: ${{ steps.get_token.outputs.APP_INSTALLATION_TOKEN }}
