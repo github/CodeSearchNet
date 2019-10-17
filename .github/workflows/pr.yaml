@@ -1,7 +1,7 @@
 name: Benchmark Greeting
 on: 
   pull_request:
-    types: [opened]
+    types: [opened, reopened] #temporarily adding reopened as a cheap way of testing this action
 
 # split into two jobs so it runs in parallel, even if a little redundant
 jobs:
