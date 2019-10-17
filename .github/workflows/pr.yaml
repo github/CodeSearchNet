@@ -27,3 +27,26 @@ jobs:
         USER: ${{ github.event.pull_request.user.login }}
         ISSUE_NUMBER: ${{ github.event.pull_request.number }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+    - name: Choose Reviewer Randomly
+      run: |
+        import random
+        asignee = random.choice(['hamelsmu', 'hohsiangwu', 'mallamanis', 'mmjb'])
+        print("::set-env name=ASIGNEE::{}".format(reviewer))
+      shell: python
+      
+    - name: Make assignment
+      run: |
+        URI=https://api.github.com
+        API_VERSION=v3
+        API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
+        AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
+        # Add assignee with APIv3 # POST /repos/:owner/:repo/issues/:issue_number/assignees
+        curl -XPOST -sSL \
+        -d "{\"assignees\": [\"${ASIGNEE}\"]}" \
+        -H "${AUTH_HEADER}" \
+        -H "${API_HEADER}" \
+        "${URI}/repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/assignees"
+      env:
+        ISSUE_NUMBER: ${{ github.event.pull_request.number }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
