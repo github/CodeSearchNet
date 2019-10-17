@@ -16,7 +16,7 @@ jobs:
         API_VERSION=v3
         API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
         AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
-        MESSAGE="@${USER} Thank you for your benchmark submission!  Can you please tell us a little bit about your approach and how you trained your models etc?  What modifications, if any did you make on the baseline models provided in this repository? Thanks!"
+        MESSAGE="@${USER} Thank you for your benchmark submission!  Can you please tell us a little bit about your approach and how you trained your models etc?  What modifications, if any, did you make on the baseline models provided in this repository? Thanks!"
         # Create a comment with APIv3 # POST /repos/:owner/:repo/issues/:issue_number/comments
         curl -XPOST -sSL \
         -d "{\"body\": \"$MESSAGE\"}" \
