@@ -1,0 +1,64 @@
+name: Benchmark Greeting
+on: 
+  pull_request:
+    types: [opened, reopened]
+
+# split into two jobs so it runs in parallel, even if a little redundant
+jobs:
+  make_comment:
+    if: contains(github.event.pull_request.body, 'This pull request represents a submission to the codesearchnet benchmark.')
+    runs-on: ubuntu-latest
+    steps:
+    
+    - name: Confirm Context
+      run: |
+        echo "repo context: ${GITHUB_REPOSITORY}"
+        echo "ref context: ${GITHUB_REF}"
+        
+    - name: emit-output
+      uses: docker://hamelsmu/actions-impersonate
+      id: get_token
+      with:
+        APP_PEM: ${{ secrets.APP_PEM }}
+        APP_ID: ${{ secrets.APP_ID }}
+        
+    - name: Greeting
+      run: |
+        URI=https://api.github.com
+        API_VERSION=v3
+        API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
+        AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
+        MESSAGE="@${USER} Thank you for your benchmark submission!  Can you please tell us a little bit about your approach and how you trained your models etc?  What modifications, if any, did you make on the baseline models provided in this repository? Thanks!"
+        # Create a comment with APIv3 # POST /repos/:owner/:repo/issues/:issue_number/comments
+        curl -XPOST -sSL \
+        -d "{\"body\": \"$MESSAGE\"}" \
+        -H "${AUTH_HEADER}" \
+        -H "${API_HEADER}" \
+        "${URI}/repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/comments"
+      env:
+        USER: ${{ github.event.pull_request.user.login }}
+        ISSUE_NUMBER: ${{ github.event.pull_request.number }}
+        TOKEN: ${{ steps.get_token.outputs.APP_INSTALLATION_TOKEN }}
+  
+    - name: Choose Reviewer Randomly
+      run: |
+        import random
+        reviewer = random.choice(['hamelsmu', 'hohsiangwu', 'mallamanis', 'mmjb'])
+        print("::set-env name=REVIEWER::{}".format(reviewer))
+      shell: python
+      
+    - name: Assign Reviewer
+      run: |
+        URI=https://api.github.com
+        API_VERSION=v3
+        API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
+        AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
+        # Add assignee with APIv3 # POST /repos/:owner/:repo/pulls/:pull_number/requested_reviewers
+        curl -XPOST -sSL \
+        -d "{\"reviewers\": [\"${REVIEWER}\"]}" \
+        -H "${AUTH_HEADER}" \
+        -H "${API_HEADER}" \
+        "${URI}/repos/${GITHUB_REPOSITORY}/pulls/${PULL_NUMBER}/requested_reviewers"
+      env:
+        PULL_NUMBER: ${{ github.event.pull_request.number }}
+        TOKEN: ${{ steps.get_token.outputs.APP_INSTALLATION_TOKEN }}
