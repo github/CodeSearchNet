@@ -1,0 +1,28 @@
+name: Benchmark Greeting
+on: pull_request
+  types: [opened]
+
+# split into two jobs so it runs in parallel, even if a little redundant
+jobs:
+  make_comment:
+    if: contains(github.event.pull_request.body, 'This pull request represents a submission to the codesearchnet benchmark.')
+    runs-on: ubuntu-latest
+    steps:
+    
+    - name: Build Test Container
+      run: |
+        URI=https://api.github.com
+        API_VERSION=v3
+        API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
+        AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
+        MESSAGE="@${USER} Thank you for your benchmark submission!  Can you please tell us a little bit about your approach and how you trained your models etc?  What modifications, if any did you make on the baseline models provided in this repository? Thanks!"
+        # Create a comment with APIv3 # POST /repos/:owner/:repo/issues/:issue_number/comments
+        curl -XPOST -sSL \
+        -d "{\"body\": \"$MESSAGE\"}" \
+        -H "${AUTH_HEADER}" \
+        -H "${API_HEADER}" \
+        "${URI}/repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/comments"
+      env:
+        USER: ${{ github.event.pull_request.user.login }}
+        ISSUE_NUMBER: ${{ github.event.pull_request.number }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
