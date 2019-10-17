@@ -1,7 +1,7 @@
 name: Benchmark Greeting
 on: 
   pull_request:
-    types: [opened]
+    types: [opened, reopened]
 
 # split into two jobs so it runs in parallel, even if a little redundant
 jobs:
@@ -10,6 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     
+    - name: Confirm Context
+      run: |
+        echo "repo context: ${GITHUB_REPOSITORY}"
+        echo "ref context: ${GITHUB_REF}"
+        
     - name: Greeting
       run: |
         URI=https://api.github.com
