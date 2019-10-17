@@ -31,7 +31,7 @@ jobs:
     - name: Choose Reviewer Randomly
       run: |
         import random
-        asignee = random.choice(['hamelsmu', 'hohsiangwu', 'mallamanis', 'mmjb'])
+        reviewer = random.choice(['hamelsmu', 'hohsiangwu', 'mallamanis', 'mmjb'])
         print("::set-env name=ASIGNEE::{}".format(reviewer))
       shell: python
       
