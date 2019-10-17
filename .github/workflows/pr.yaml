@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     
-    - name: Build Test Container
+    - name: Greeting
       run: |
         URI=https://api.github.com
         API_VERSION=v3
