@@ -32,21 +32,21 @@ jobs:
       run: |
         import random
         reviewer = random.choice(['hamelsmu', 'hohsiangwu', 'mallamanis', 'mmjb'])
-        print("::set-env name=ASIGNEE::{}".format(reviewer))
+        print("::set-env name=REVIEWER::{}".format(reviewer))
       shell: python
       
-    - name: Make assignment
+    - name: Assign Reviewer
       run: |
         URI=https://api.github.com
         API_VERSION=v3
         API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
         AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
-        # Add assignee with APIv3 # POST /repos/:owner/:repo/issues/:issue_number/assignees
+        # Add assignee with APIv3 # POST /repos/:owner/:repo/pulls/:pull_number/requested_reviewers
         curl -XPOST -sSL \
-        -d "{\"assignees\": [\"${ASIGNEE}\"]}" \
+        -d "{\"reviewers\": [\"${REVIEWER}\"]}" \
         -H "${AUTH_HEADER}" \
         -H "${API_HEADER}" \
-        "${URI}/repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/assignees"
+        "${URI}/repos/${GITHUB_REPOSITORY}/pulls/${PULL_NUMBER}/requested_reviewers"
       env:
-        ISSUE_NUMBER: ${{ github.event.pull_request.number }}
+        PULL_NUMBER: ${{ github.event.pull_request.number }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
