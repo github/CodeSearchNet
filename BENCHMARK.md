@@ -71,3 +71,7 @@ Once you upload your \`model_predictions.csv\` file, W&B will compute the normal
 Replicating our results for the CodeSearchNet baseline is optional, as we encourage the community to create their own models and methods for ranking search results.  To replicate our baseline submission, you can start with the "Quickstart" instructions in the [CodeSearchNet GitHub repository](https://github.com/github/CodeSearchNet).  This baseline model uses [src/predict.py](src/predict.py) to generate the submission file.
 
 Your run will be logged to W&B, within a project that will be automatically linked to this benchmark.
+
+### Rules
+
+**Only 1 submission to the benchmark leaderboard is allowed every 2 weeks.**  Our intention is not for participants to make many submissions to the leaderboard with different parameters -- as this kind of overfitting is counterproductive. There are no cash prizes and the idea is to learn from this dataset, for example, to apply the learned representations or utilize new techniques.
