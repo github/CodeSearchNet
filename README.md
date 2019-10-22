@@ -4,10 +4,38 @@
 
 [paper]: https://arxiv.org/abs/1909.09436
 
+# Quickstart for Team BERT and ERNIE
+
+Howdy, cowboy. You've done near stepped right into a duel with Tensorfoe. :3
+
+Alright so here's where the important parts of the code are for us.
+
+## /src/train.py
+
+As mentioned in the [Training](#training) section, this file can take a command line argument `--model` for specifying which model you want to use for an encoder.
+
+## /src/model_restore_helper.py
+
+The `--model` argument is consumed here and is where **we will need to add an additional if clause for every new model that we implement.**
+
+## /src/models
+
+This folder contains model abstractions that allow you to define hyperparameters. Each model inherites the `Model` super class. There is not much implementation here but **we will need to create one for each encoder.**
+
+## /src/encoders
+
+This is where the magic happens. The encoders are implemented here (the tensorflow is here). Check out `rnn_seq_encoder.py` as a good starting point for understanding how the implementation works.
+
+**This is where we will implement the encoders.** Just follow the inheritance rules for `SeqEncoder` and you should be good.
+
 **Table of Contents**
 
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
-
+- [Quickstart for Team BERT and ERNIE](#quickstart-for-team-bert-and-ernie)
+	- [/src/train.py](#srctrainpy)
+ 	- [/src/model_restore_helper.py](#srcmodelrestorehelperpy)
+	- [/src/models](#srcmodels)
+	- [/src/encoders](#srcencoders)
 - [Quickstart](#quickstart)
 - [Introduction](#introduction)
 	- [Project Overview](#project-overview)
