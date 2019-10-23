@@ -114,7 +114,7 @@ def pool_sequence_embedding(pool_mode: str,
 
     Args:
         pool_mode: The pooling mode, one of "mean", "max", "weighted_mean", "concat". For
-         the latter, a weight network is introduced that computes a score (from [0,1])
+         "weighted_mean", a weight network is introduced that computes a score (from [0,1])
          for each token, and embeddings are weighted by that score when computing
          the mean.
 
@@ -122,8 +122,8 @@ def pool_sequence_embedding(pool_mode: str,
          concatenates the mean and max pool of the hidden states to the final hidden state.
          For our implementation, we make the assumption that the embedding size has been 
          adaquately adjusted to be three times the final hidden dim hyperparameter of the 
-         model that is being used. For example, if the embedding size is 128 (default), 
-         if the encoder is an RNN, the hyperparameter 'rnn_hidden_dim' must be set to 
+         model that is being used. For example, if the embedding size is 128 (default) and
+         the encoder is an RNN, then the hyperparameter 'rnn_hidden_dim' must be set to 
          floor(128/3) for a unidirectional model and floor(64/3) for a bidirectional model.
 
         sequence_token_embeddings: A float32 tensor of shape [B, T, D], where B is the
