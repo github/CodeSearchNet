@@ -168,9 +168,9 @@ def pool_sequence_embedding(pool_mode: str,
         seq_token_embeddings_masked = \
             sequence_token_embeddings * tf.expand_dims(sequence_token_masks, axis=-1)  # B x T x D
         
-        return tf.concat( [ tf.squeeze(seq_token_embeddings_masked[:, -1, :]), # last hidden state, squeeze from B x 1 x D to B x D
-                            max_pool(),                                        # max pool, B x D
-                            mean_pool()                                        # mean pool, B x D
-                          ] , axis=1)                                          # concat pool, B x 3*D (refer to note above about increased embedding size)
+        return tf.concat( [ tf.squeeze(seq_token_embeddings_masked[:, -1, :]),                              # last hidden state, squeeze from B x 1 x D to B x D
+                            max_pool(sequence_token_embeddings, sequence_lengths, sequence_token_masks),    # max pool, B x D
+                            mean_pool(sequence_token_embeddings, sequence_lengths, sequence_token_masks)    # mean pool, B x D
+                          ] , axis=1)                                                                       # concat pool, B x 3*D (refer to note above about increased embedding size)
     else:
         raise ValueError("Unknown sequence pool mode '%s'!" % pool_mode)
