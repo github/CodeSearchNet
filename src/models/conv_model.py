@@ -1,10 +1,16 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Type
 
-from encoders import ConvolutionSeqEncoder
+from encoders import ConvolutionSeqEncoder, Encoder
 from .model import Model
 
 
 class ConvolutionalModel(Model):
+    query_encoder_type = ConvolutionSeqEncoder
+
+    @classmethod
+    def code_encoder_type(cls, language: str) -> Type[Encoder]:
+        return ConvolutionSeqEncoder
+
     @classmethod
     def get_default_hyperparameters(cls) -> Dict[str, Any]:
         hypers = {}
@@ -28,8 +34,6 @@ class ConvolutionalModel(Model):
                  log_save_dir: Optional[str] = None):
         super().__init__(
             hyperparameters,
-            code_encoder_type=ConvolutionSeqEncoder,
-            query_encoder_type=ConvolutionSeqEncoder,
             run_name=run_name,
             model_save_dir=model_save_dir,
             log_save_dir=log_save_dir)

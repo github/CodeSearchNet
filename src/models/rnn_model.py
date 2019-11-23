@@ -1,10 +1,16 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Type
 
-from encoders import RNNEncoder
+from encoders import RNNEncoder, Encoder
 from models import Model
 
 
 class RNNModel(Model):
+    query_encoder_type = RNNEncoder
+
+    @classmethod
+    def code_encoder_type(cls, language: str) -> Type[Encoder]:
+        return RNNEncoder
+
     @classmethod
     def get_default_hyperparameters(cls) -> Dict[str, Any]:
         hypers = {}
@@ -27,8 +33,6 @@ class RNNModel(Model):
                  log_save_dir: Optional[str] = None):
         super().__init__(
             hyperparameters,
-            code_encoder_type=RNNEncoder,
-            query_encoder_type=RNNEncoder,
             run_name=run_name,
             model_save_dir=model_save_dir,
             log_save_dir=log_save_dir)

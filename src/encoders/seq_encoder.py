@@ -1,3 +1,4 @@
+from abc import ABCMeta
 from collections import Counter
 import numpy as np
 from typing import Dict, Any, List, Iterable, Optional, Tuple
@@ -14,7 +15,7 @@ from dpu_utils.mlutils import Vocabulary
 from .encoder import Encoder, QueryType
 
 
-class SeqEncoder(Encoder):
+class SeqEncoder(Encoder, metaclass=ABCMeta):
     @classmethod
     def get_default_hyperparameters(cls) -> Dict[str, Any]:
         encoder_hypers = { 'token_vocab_size': 10000,

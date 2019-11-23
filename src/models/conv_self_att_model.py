@@ -1,10 +1,16 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Type
 
-from encoders import ConvSelfAttentionEncoder
+from encoders import ConvSelfAttentionEncoder, Encoder
 from .model import Model
 
 
 class ConvSelfAttentionModel(Model):
+    query_encoder_type = ConvSelfAttentionEncoder
+
+    @classmethod
+    def code_encoder_type(cls, language: str) -> Type[Encoder]:
+        return ConvSelfAttentionEncoder
+
     @classmethod
     def get_default_hyperparameters(cls) -> Dict[str, Any]:
         hypers = {}
@@ -28,8 +34,6 @@ class ConvSelfAttentionModel(Model):
                  log_save_dir: Optional[str] = None):
         super().__init__(
             hyperparameters,
-            code_encoder_type=ConvSelfAttentionEncoder,
-            query_encoder_type=ConvSelfAttentionEncoder,
             run_name=run_name,
             model_save_dir=model_save_dir,
             log_save_dir=log_save_dir)

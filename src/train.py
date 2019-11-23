@@ -83,8 +83,11 @@ def run_train(model_class: Type[Model],
     
     wandb.config.update(model.hyperparameters)
     model.train_log("Loading training and validation data.")
-    train_data = model.load_data_from_dirs(train_data_dirs, is_test=False, max_files_per_dir=max_files_per_dir, parallelize=parallelize)
-    valid_data = model.load_data_from_dirs(valid_data_dirs, is_test=False, max_files_per_dir=max_files_per_dir, parallelize=parallelize)
+    dataloader = model.dataloader()
+    train_data, _train_samples_cnt = dataloader.load_data_from_dirs(
+        train_data_dirs, is_test=False, max_files_per_dir=max_files_per_dir, parallelize=parallelize)
+    valid_data, _valid_samples_cnt = dataloader.load_data_from_dirs(
+        valid_data_dirs, is_test=False, max_files_per_dir=max_files_per_dir, parallelize=parallelize)
     model.train_log("Begin Training.")
     model_path = model.train(train_data, valid_data, azure_info_path, quiet=quiet, resume=resume)
     return model_path

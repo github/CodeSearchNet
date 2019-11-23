@@ -1,10 +1,16 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Type
 
-from encoders import NBoWEncoder
+from encoders import NBoWEncoder, Encoder
 from .model import Model
 
 
 class NeuralBoWModel(Model):
+    query_encoder_type = NBoWEncoder
+
+    @classmethod
+    def code_encoder_type(cls, language: str) -> Type[Encoder]:
+        return NBoWEncoder
+
     @classmethod
     def get_default_hyperparameters(cls) -> Dict[str, Any]:
         hypers = {}
@@ -28,8 +34,6 @@ class NeuralBoWModel(Model):
                  log_save_dir: Optional[str] = None):
         super().__init__(
             hyperparameters,
-            code_encoder_type=NBoWEncoder,
-            query_encoder_type=NBoWEncoder,
             run_name=run_name,
             model_save_dir=model_save_dir,
             log_save_dir=log_save_dir)

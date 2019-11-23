@@ -1,21 +1,17 @@
 import os
-import itertools
-import multiprocessing
 import random
 import time
 from abc import ABC, abstractmethod
 from collections import defaultdict, OrderedDict
 from enum import Enum, auto
-from typing import List, Dict, Any, Iterable, Tuple, Optional, Union, Callable, Type, DefaultDict
+from typing import *
 
 import numpy as np
-import wandb
 import tensorflow as tf
+import wandb
 from dpu_utils.utils import RichPath
 
-from utils.py_utils import run_jobs_in_parallel
 from encoders import Encoder, QueryType
-
 
 LoadedSamples = Dict[str, List[Dict[str, Any]]]
 SampleId = Tuple[str, int]
@@ -26,57 +22,15 @@ class RepresentationType(Enum):
     QUERY = auto()
 
 
-def get_data_files_from_directory(data_dirs: List[RichPath],
-                                  max_files_per_dir: Optional[int] = None) -> List[RichPath]:
-    files = []  # type: List[str]
-    for data_dir in data_dirs:
-        dir_files = data_dir.get_filtered_files_in_dir('*.jsonl.gz')
-        if max_files_per_dir:
-            dir_files = sorted(dir_files)[:int(max_files_per_dir)]
-        files += dir_files
-
-    np.random.shuffle(files)  # This avoids having large_file_0, large_file_1, ... subsequences
-    return files
-
-
-def parse_data_file(hyperparameters: Dict[str, Any],
-                    code_encoder_class: Type[Encoder],
-                    per_code_language_metadata: Dict[str, Dict[str, Any]],
-                    query_encoder_class: Type[Encoder],
-                    query_metadata: Dict[str, Any],
-                    is_test: bool,
-                    data_file: RichPath) -> Dict[str, List[Tuple[bool, Dict[str, Any]]]]:
-    results: DefaultDict[str, List] = defaultdict(list)
-    for raw_sample in data_file.read_by_file_suffix():
-        sample: Dict = {}
-        language = raw_sample['language']
-        if language.startswith('python'):  # In some datasets, we use 'python-2.7' and 'python-3'
-            language = 'python'
-
-        # the load_data_from_sample method call places processed data into sample, and
-        # returns a boolean flag indicating if sample should be used
-        function_name = raw_sample.get('func_name')
-        use_code_flag = code_encoder_class.load_data_from_sample("code",
-                                                                 hyperparameters,
-                                                                 per_code_language_metadata[language],
-                                                                 raw_sample['code_tokens'],
-                                                                 function_name,
-                                                                 sample,
-                                                                 is_test)
-
-        use_query_flag = query_encoder_class.load_data_from_sample("query",
-                                                                   hyperparameters,
-                                                                   query_metadata,
-                                                                   [d.lower() for d in raw_sample['docstring_tokens']],
-                                                                   function_name,
-                                                                   sample,
-                                                                   is_test)
-        use_example = use_code_flag and use_query_flag
-        results[language].append((use_example, sample))
-    return results
-
-
 class Model(ABC):
+    query_encoder_type: Type[Encoder]
+
+    @classmethod
+    @abstractmethod
+    def code_encoder_type(cls, language: str) -> Type[Encoder]:
+        raise NotImplementedError
+
+
     @classmethod
     @abstractmethod
     def get_default_hyperparameters(cls) -> Dict[str, Any]:
@@ -112,15 +66,11 @@ class Model(ABC):
 
     def __init__(self,
                  hyperparameters: Dict[str, Any],
-                 code_encoder_type: Type[Encoder],
-                 query_encoder_type: Type[Encoder],
                  run_name: Optional[str] = None,
                  model_save_dir: Optional[str] = None,
                  log_save_dir: Optional[str] = None) -> None:
-        self.__code_encoder_type = code_encoder_type
         self.__code_encoders: OrderedDict[str, Any] = OrderedDict()  # OrderedDict as we are using the order of languages a few times...
 
-        self.__query_encoder_type = query_encoder_type
         self.__query_encoder: Any = None
 
         # start with default hyper-params and then override them
@@ -128,7 +78,7 @@ class Model(ABC):
         self.hyperparameters.update(hyperparameters)
 
         self.__query_metadata: Dict[str, Any] = {}
-        self.__per_code_language_metadata: Dict[str, Any] = {}
+        self.__per_code_language_metadata: Dict[str, Dict[str, Any]] = {}
         self.__placeholders: Dict[str, Union[tf.placeholder, tf.placeholder_with_default]] = {}
         self.__ops: Dict[str, Any] = {}
         if run_name is None:
@@ -253,16 +203,15 @@ class Model(ABC):
         with tf.variable_scope("code_encoder"):
             language_encoders = []
             for (language, language_metadata) in sorted(self.__per_code_language_metadata.items(), key=lambda kv: kv[0]):
+                encoder_type = self.code_encoder_type(language)
                 with tf.variable_scope(language):
-                    self.__code_encoders[language] = self.__code_encoder_type(label="code",
-                                                                              hyperparameters=self.hyperparameters,
-                                                                              metadata=language_metadata)
+                    self.__code_encoders[language] = encoder_type(
+                        label="code", hyperparameters=self.hyperparameters, metadata=language_metadata)
                     language_encoders.append(self.__code_encoders[language].make_model(is_train=is_train))
             self.ops['code_representations'] = tf.concat(language_encoders, axis=0)
         with tf.variable_scope("query_encoder"):
-            self.__query_encoder = self.__query_encoder_type(label="query",
-                                                             hyperparameters=self.hyperparameters,
-                                                             metadata=self.__query_metadata)
+            self.__query_encoder = self.query_encoder_type(
+                label="query", hyperparameters=self.hyperparameters, metadata=self.__query_metadata)
             self.ops['query_representations'] = self.__query_encoder.make_model(is_train=is_train)
 
         code_representation_size = next(iter(self.__code_encoders.values())).output_representation_size
@@ -281,70 +230,19 @@ class Model(ABC):
                 return self.__query_encoder.get_token_embeddings()
 
     def _make_loss(self) -> None:
+        import loss
         if self.hyperparameters['loss'] == 'softmax':
-            logits = tf.matmul(self.ops['query_representations'],
-                               self.ops['code_representations'],
-                               transpose_a=False,
-                               transpose_b=True,
-                               name='code_query_cooccurrence_logits',
-                               )  # B x B
-
-            similarity_scores = logits
-
-            per_sample_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
-                labels=tf.range(tf.shape(self.ops['code_representations'])[0]),  # [0, 1, 2, 3, ..., n]
-                logits=logits
-            )
+            loss = loss.SoftMax
         elif self.hyperparameters['loss'] == 'cosine':
-            query_norms = tf.norm(self.ops['query_representations'], axis=-1, keep_dims=True) + 1e-10
-            code_norms = tf.norm(self.ops['code_representations'], axis=-1, keep_dims=True) + 1e-10
-            cosine_similarities = tf.matmul(self.ops['query_representations'] / query_norms,
-                                            self.ops['code_representations'] / code_norms,
-                                            transpose_a=False,
-                                            transpose_b=True,
-                                            name='code_query_cooccurrence_logits',
-                                            )  # B x B
-            similarity_scores = cosine_similarities
-
-            # A max-margin-like loss, but do not penalize negative cosine similarities.
-            neg_matrix = tf.diag(tf.fill(dims=[tf.shape(cosine_similarities)[0]], value=float('-inf')))
-            per_sample_loss = tf.maximum(0., self.hyperparameters['margin']
-                                             - tf.diag_part(cosine_similarities)
-                                             + tf.reduce_max(tf.nn.relu(cosine_similarities + neg_matrix),
-                                                             axis=-1))
+            loss = loss.Cosine(self.hyperparameters['margin'])
         elif self.hyperparameters['loss'] == 'max-margin':
-            logits = tf.matmul(self.ops['query_representations'],
-                               self.ops['code_representations'],
-                               transpose_a=False,
-                               transpose_b=True,
-                               name='code_query_cooccurrence_logits',
-                               )  # B x B
-            similarity_scores = logits
-            logprobs = tf.nn.log_softmax(logits)
-
-            min_inf_matrix = tf.diag(tf.fill(dims=[tf.shape(logprobs)[0]], value=float('-inf')))
-            per_sample_loss = tf.maximum(0., self.hyperparameters['margin']
-                                             - tf.diag_part(logprobs)
-                                             + tf.reduce_max(logprobs + min_inf_matrix, axis=-1))
+            loss = loss.MaxMargin(self.hyperparameters['margin'])
         elif self.hyperparameters['loss'] == 'triplet':
-            query_reps = self.ops['query_representations']  # BxD
-            code_reps = self.ops['code_representations']    # BxD
-
-            query_reps = tf.broadcast_to(query_reps, shape=[tf.shape(query_reps)[0], tf.shape(query_reps)[0],tf.shape(query_reps)[1]])  # B*xBxD
-            code_reps = tf.broadcast_to(code_reps, shape=[tf.shape(code_reps)[0], tf.shape(code_reps)[0],tf.shape(code_reps)[1]])  # B*xBxD
-            code_reps = tf.transpose(code_reps, perm=(1, 0, 2))  # BxB*xD
-
-            all_pair_distances = tf.norm(query_reps - code_reps, axis=-1)  # BxB
-            similarity_scores = -all_pair_distances
-
-            correct_distances = tf.expand_dims(tf.diag_part(all_pair_distances), axis=-1)  # Bx1
-
-            pointwise_loss = tf.nn.relu(correct_distances - all_pair_distances + self.hyperparameters['margin']) # BxB
-            pointwise_loss *= (1 - tf.eye(tf.shape(pointwise_loss)[0]))
-
-            per_sample_loss = tf.reduce_sum(pointwise_loss, axis=-1) / (tf.reduce_sum(tf.cast(tf.greater(pointwise_loss, 0), dtype=tf.float32), axis=-1) + 1e-10)  # B
+            loss = loss.Triplet(self.hyperparameters['margin'])
         else:
             raise Exception(f'Unrecognized loss-type "{self.hyperparameters["loss"]}"')
+        similarity_scores, per_sample_loss = loss.make_loss(
+            self.ops['query_representations'], self.ops['code_representations'])
 
         per_sample_loss = per_sample_loss * self.placeholders['sample_loss_weights']
         self.ops['loss'] = tf.reduce_sum(per_sample_loss) / tf.reduce_sum(self.placeholders['sample_loss_weights'])
@@ -392,46 +290,15 @@ class Model(ABC):
         self.ops['train_step'] = optimizer.apply_gradients(pruned_clipped_gradients)
 
     def load_metadata(self, data_dirs: List[RichPath], max_files_per_dir: Optional[int] = None, parallelize: bool = True) -> None:
-        raw_query_metadata_list = []
-        raw_code_language_metadata_lists: DefaultDict[str, List] = defaultdict(list)
-
-        def metadata_parser_fn(_, file_path: RichPath) -> Iterable[Tuple[Dict[str, Any], Dict[str, Dict[str, Any]]]]:
-            raw_query_metadata = self.__query_encoder_type.init_metadata()
-            per_code_language_metadata: DefaultDict[str, Dict[str, Any]] = defaultdict(self.__code_encoder_type.init_metadata)
-
-            for raw_sample in file_path.read_by_file_suffix():
-                sample_language = raw_sample['language']
-                self.__code_encoder_type.load_metadata_from_sample(raw_sample['code_tokens'],
-                                                                   per_code_language_metadata[sample_language],
-                                                                   self.hyperparameters['code_use_subtokens'],
-                                                                   self.hyperparameters['code_mark_subtoken_end'])
-                self.__query_encoder_type.load_metadata_from_sample([d.lower() for d in raw_sample['docstring_tokens']],
-                                                                    raw_query_metadata)
-            yield (raw_query_metadata, per_code_language_metadata)
-
-        def received_result_callback(metadata_parser_result: Tuple[Dict[str, Any], Dict[str, Dict[str, Any]]]):
-            (raw_query_metadata, per_code_language_metadata) = metadata_parser_result
-            raw_query_metadata_list.append(raw_query_metadata)
-            for (metadata_language, raw_code_language_metadata) in per_code_language_metadata.items():
-                raw_code_language_metadata_lists[metadata_language].append(raw_code_language_metadata)
-
-        def finished_callback():
-            pass
+        from metadata import MetadataLoader
+        loader = MetadataLoader(self.query_encoder_type, self.code_encoder_type, self.hyperparameters)
 
         if parallelize:
-            run_jobs_in_parallel(get_data_files_from_directory(data_dirs, max_files_per_dir),
-                                 metadata_parser_fn,
-                                 received_result_callback,
-                                 finished_callback)
+            loader.load_parallel(data_dirs, max_files_per_dir)
         else:
-            for (idx, file) in enumerate(get_data_files_from_directory(data_dirs, max_files_per_dir)):
-                for res in metadata_parser_fn(idx, file):
-                    received_result_callback(res)
+            loader.load_sequential(data_dirs, max_files_per_dir)
 
-        self.__query_metadata = self.__query_encoder_type.finalise_metadata("query", self.hyperparameters, raw_query_metadata_list)
-        for (language, raw_per_language_metadata) in raw_code_language_metadata_lists.items():
-            self.__per_code_language_metadata[language] = \
-                self.__code_encoder_type.finalise_metadata("code", self.hyperparameters, raw_per_language_metadata)
+        self.__query_metadata, self.__per_code_language_metadata = loader.finalize_metadata()
 
     def load_existing_metadata(self, metadata_path: RichPath):
         saved_data = metadata_path.read_by_file_suffix()
@@ -448,42 +315,15 @@ class Model(ABC):
         self.__query_metadata = saved_data['query_metadata']
         self.__per_code_language_metadata = saved_data['per_code_language_metadata']
 
-    def load_data_from_dirs(self, data_dirs: List[RichPath], is_test: bool,
-                            max_files_per_dir: Optional[int] = None,
-                            return_num_original_samples: bool = False, 
-                            parallelize: bool = True) -> Union[LoadedSamples, Tuple[LoadedSamples, int]]:
-        return self.load_data_from_files(data_files=list(get_data_files_from_directory(data_dirs, max_files_per_dir)),
-                                         is_test=is_test,
-                                         return_num_original_samples=return_num_original_samples,
-                                         parallelize=parallelize)
-
-    def load_data_from_files(self, data_files: Iterable[RichPath], is_test: bool,
-                             return_num_original_samples: bool = False, parallelize: bool = True) -> Union[LoadedSamples, Tuple[LoadedSamples, int]]:
-        tasks_as_args = [(self.hyperparameters,
-                          self.__code_encoder_type,
-                          self.__per_code_language_metadata,
-                          self.__query_encoder_type,
-                          self.__query_metadata,
-                          is_test,
-                          data_file)
-                         for data_file in data_files]
-
-        if parallelize:
-            with multiprocessing.Pool() as pool:
-                per_file_results = pool.starmap(parse_data_file, tasks_as_args)
-        else:
-            per_file_results = [parse_data_file(*task_args) for task_args in tasks_as_args]
-        samples: DefaultDict[str, List] = defaultdict(list)
-        num_all_samples = 0
-        for per_file_result in per_file_results:
-            for (language, parsed_samples) in per_file_result.items():
-                for (use_example, parsed_sample) in parsed_samples:
-                    num_all_samples += 1
-                    if use_example:
-                        samples[language].append(parsed_sample)
-        if return_num_original_samples:
-            return samples, num_all_samples
-        return samples
+    def dataloader(self):
+        from dataloader import DataLoader
+        return DataLoader(
+            self.query_encoder_type,
+            self.code_encoder_type,
+            self.hyperparameters,
+            self.__query_metadata,
+            self.__per_code_language_metadata,
+        )
 
     def __init_minibatch(self) -> Dict[str, Any]:
         """
@@ -903,7 +743,7 @@ class Model(ABC):
     def get_query_representations(self, query_data: List[Dict[str, Any]]) -> List[Optional[np.ndarray]]:
         def query_data_loader(sample_to_parse, result_holder):
             function_name = sample_to_parse.get('func_name')
-            return self.__query_encoder_type.load_data_from_sample(
+            return self.query_encoder_type.load_data_from_sample(
                 "query",
                 self.hyperparameters,
                 self.__query_metadata,
@@ -926,7 +766,7 @@ class Model(ABC):
 
             if code_tokens is not None:
                 function_name = sample_to_parse.get('func_name')
-                return self.__code_encoder_type.load_data_from_sample(
+                return self.code_encoder_type(language).load_data_from_sample(
                     "code",
                     self.hyperparameters,
                     self.__per_code_language_metadata[language],
