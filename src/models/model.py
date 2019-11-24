@@ -295,10 +295,12 @@ class Model(ABC):
 
         if parallelize:
             loader.load_parallel(data_dirs, max_files_per_dir)
+            finalized = loader.finalize_parallel()
         else:
             loader.load_sequential(data_dirs, max_files_per_dir)
+            finalized = loader.finalize_metadata()
 
-        self.__query_metadata, self.__per_code_language_metadata = loader.finalize_metadata()
+        self.__query_metadata, self.__per_code_language_metadata = finalized
 
     def load_existing_metadata(self, metadata_path: RichPath):
         saved_data = metadata_path.read_by_file_suffix()

@@ -1,3 +1,4 @@
+import multiprocessing
 from collections import defaultdict
 from typing import *
 
@@ -72,6 +73,26 @@ class MetadataLoader:
             code_metadata[language] = self.code_encoder_types(language).finalise_metadata(
                 "code", self.hyperparameters, raw_per_language_metadata
             )
+        return query_metadata, code_metadata
+
+    def finalize_parallel(self) -> Tuple[Metadata, Dict[str, Metadata]]:
+        with multiprocessing.Pool() as pool:
+            # commit tasks
+            query_metadata_task = pool.apply_async(
+                self.query_encoder_type.finalise_metadata,
+                ("query", self.hyperparameters, self.raw_query_metadata_list)
+            )
+            code_metadata_tasks = {}
+            for language, raw_per_language_metadata in self.raw_code_language_metadata_lists.items():
+                code_metadata_tasks[language] = pool.apply_async(
+                    self.code_encoder_types(language).finalise_metadata,
+                    ("code", self.hyperparameters, raw_per_language_metadata),
+                )
+            # and join on their results
+            query_metadata: Metadata = query_metadata_task.get()
+            code_metadata: Dict[str, Metadata] = {}
+            for language in self.raw_code_language_metadata_lists.keys():
+                code_metadata[language] = code_metadata_tasks[language].get()
         return query_metadata, code_metadata
 
 
