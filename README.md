@@ -71,7 +71,7 @@ Finally, you can submit your run to the [community benchmark](https://app.wandb.
   3. Baseline evaluation metrics and utilities
   4. Mechanisms to track progress on a [shared community benchmark](https://app.wandb.ai/github/CodeSearchNet/benchmark) hosted by [Weights & Biases](https://www.wandb.com/)
 
-We hope that CodeSearchNet is a step towards engaging with the broader machine learning and NLP community regarding the relationship between source code and natural language. We describe a specific task here, but we expect and welcome other uses of our dataset.
+CodeSearchNet is slowly engaging the relationship between source code and natural language of machine learning. We describe a specific task here, but we expect and welcome other uses of our dataset.
 
 More context regarding the motivation for this problem is in this [technical report][paper].
 
