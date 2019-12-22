@@ -10,6 +10,7 @@ RUN pip --no-cache-dir install --upgrade \
     typed_ast \
     more_itertools \
     scipy \
+    sentencepiece \
     toolz \
     tqdm \
     pandas \
