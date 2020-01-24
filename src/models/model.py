@@ -758,7 +758,7 @@ class Model(ABC):
               quiet: bool = False,
               resume: bool = False) -> RichPath:
         model_path = RichPath.create(self.model_save_path, azure_info_path)
-        with self.__sess.as_default():
+        with self.__sess.graph.as_default():
             tf.set_random_seed(self.hyperparameters['seed'])
             train_data_per_lang_nums = {language: len(samples) for language, samples in train_data.items()}
             print('Training on %s samples.' % (", ".join("%i %s" % (num, lang) for (lang, num) in train_data_per_lang_nums.items())))
