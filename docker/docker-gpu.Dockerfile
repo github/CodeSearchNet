@@ -2,7 +2,7 @@ FROM tensorflow/tensorflow:1.12.0-gpu-py3
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 RUN add-apt-repository -y ppa:git-core/ppa
-RUN add-apt-repository -y ppa:jonathonf/python-3.6
+RUN add-apt-repository -y ppa:deadsnakes/ppa
 
 RUN apt-get update --fix-missing && apt-get install -y wget bzip2 ca-certificates \
     byobu \
