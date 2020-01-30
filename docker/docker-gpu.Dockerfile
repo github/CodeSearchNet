@@ -53,6 +53,7 @@ RUN pip --no-cache-dir install --upgrade \
     pandas==0.25.0 \
     parso==0.5.1 \
     pygments==2.4.2 \
+    PyYAML==4.2b4 \
     requests==2.22.0 \
     scipy==1.3.1 \
     SetSimilaritySearch==0.1.7 \
