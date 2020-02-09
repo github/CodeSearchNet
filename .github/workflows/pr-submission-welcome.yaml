@@ -1,30 +1,3 @@
-name: PR-Greeting
-on:
-  pull_request:
-    types: [opened, reopened]
-
-jobs:
-    build-site:
-        runs-on: ubuntu-latest
-        steps:
-        - name: Get token
-          id: get_token
-          uses: machine-learning-apps/actions-app-token@master
-          with:
-            APP_PEM: ${{ secrets.APP_PEM }}
-            APP_ID: ${{ secrets.APP_ID }}
-
-        - name: greeting
-          uses: actions/first-interaction@v1
-          with:
-            repo-token: ${{ steps.get_token.outputs.app_token }}
-            pr-message: "@${USER} Thank you for your benchmark submission!  Can you please tell us a little bit about your approach and how you trained your models etc?  What modifications, if any, did you make on the baseline models provided in this repository? Thanks!"
-
-
-
-
-
-
 name: Benchmark Greeting
 on: 
   pull_request:
