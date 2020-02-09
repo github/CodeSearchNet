@@ -2,7 +2,7 @@ FROM tensorflow/tensorflow:1.12.0-gpu-py3
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 RUN add-apt-repository -y ppa:git-core/ppa
-RUN add-apt-repository -y ppa:jonathonf/python-3.6
+RUN add-apt-repository -y ppa:deadsnakes/ppa
 
 RUN apt-get update --fix-missing && apt-get install -y wget bzip2 ca-certificates \
     byobu \
@@ -53,6 +53,7 @@ RUN pip --no-cache-dir install --upgrade \
     pandas==0.25.0 \
     parso==0.5.1 \
     pygments==2.4.2 \
+    pyyaml==5.3 \
     requests==2.22.0 \
     scipy==1.3.1 \
     SetSimilaritySearch==0.1.7 \
