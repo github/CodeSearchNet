@@ -3,7 +3,6 @@ on:
   pull_request:
     types: [opened, reopened]
 
-# split into two jobs so it runs in parallel, even if a little redundant
 jobs:
   make_comment:
     if: contains(github.event.pull_request.body, 'This pull request represents a submission to the codesearchnet benchmark.')
