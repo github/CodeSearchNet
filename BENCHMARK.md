@@ -2,6 +2,8 @@
 
 The [Weights & Biases (W&B)](https://www.wandb.com) [benchmark](https://app.wandb.ai/github/CodeSearchNet/benchmark) tracks and compares models trained on the CodeSearchNet dataset by the global machine learning research community. Anyone is welcome to submit their results for review.
 
+The leaderboard is available at <https://app.wandb.ai/github/codesearchnet/benchmark/leaderboard>.
+
 ## Submission process
 
 ### Requirements
