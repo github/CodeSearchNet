@@ -223,6 +223,7 @@ class Model(ABC):
         print(msg.encode('ascii', errors='replace').decode())
 
     def make_model(self, is_train: bool):
+        # tf.enable_eager_execution()
         with self.__sess.graph.as_default():
             random.seed(self.hyperparameters['seed'])
             np.random.seed(self.hyperparameters['seed'])

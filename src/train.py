@@ -129,6 +129,16 @@ def run(arguments, tag_in_vcs=False) -> None:
     model_class = model_restore_helper.get_model_class_from_name(arguments['--model'])
 
     hyperparameters = model_class.get_default_hyperparameters()
+
+    #CUSTOM HYPERPARAMS
+    batch_size = arguments.get('--batch-size')
+    if batch_size:
+        hyperparameters['batch_size'] = int(batch_size)
+    # hyperparameters['code_use_bpe'] = False
+    # hyperparameters['query_use_bpe'] = False
+
+    print("testing, stuff", hyperparameters['batch_size'])
+
     run_name = make_run_id(arguments)
 
     # make name of wandb run = run_id (Doesn't populate yet)
@@ -187,5 +197,17 @@ def run(arguments, tag_in_vcs=False) -> None:
 
 
 if __name__ == '__main__':
+    print('random test')
     args = docopt(__doc__)
-    run_and_debug(lambda: run(args), args['--debug'])
+    args['--model'] = 'selfatt'
+    args['--dryrun'] = True
+    # args['--testrun'] = True
+    args['--sequential'] = True
+    args['--max_epoch'] = 20
+    args['--batch-size'] = 2
+
+    # run_and_debug(lambda: run(args), args['--debug'])
+
+    # args = docopt(__doc__)
+    # args=['--model', 'selfatten', '--testrun']
+    run(args)
