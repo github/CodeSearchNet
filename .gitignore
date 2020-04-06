@@ -25,3 +25,9 @@ resources/
 /src/wandb/run-*
 /src/wandb/debug.log
 *.html
+
+
+#mac
+.DS_Store
+src/pyvenv.cfg
+src/wandb
