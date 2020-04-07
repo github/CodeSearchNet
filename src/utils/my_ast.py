@@ -251,7 +251,7 @@ def get_docstring(node, clean=True):
     If *clean* is `True`, all tabs are expanded to spaces and any whitespace
     that can be uniformly removed from the second line onwards is removed.
     """
-    if not isinstance(node, (AsyncFunctionDef, FunctionDef, ClassDef, Module)):
+    if not isinstance(node, (FunctionDef, ClassDef, Module)):
         raise TypeError("%r can't have docstrings" % node.__class__.__name__)
     if not(node.body and isinstance(node.body[0], Expr)):
         return None

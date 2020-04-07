@@ -1,26 +1,43 @@
 
-from dpu_utils.utils import RichPath
-from utils.my_utils import DotDict
-from utils import my_ast
-from utils.codegen import *
-import pandas as pd
+# from src.dpu_utils.utils import RichPath
+from src.utils.my_utils import DotDict
+from src.utils import my_ast
+from src.utils.codegen import *
+import json_lines
+import gzip
+import codecs
+import json
+# import pandas as pd
+# from path
 
-path = '../resources/data/python/final/jsonl/train_old/python_train_0.jsonl.gz'
-s_path = '../resources/data/python/final/jsonl/train/python_train_0_updated.jsonl.gz'
-
-a = RichPath.create(path)
-s = RichPath.create(s_path)
-
-print('started')
-b = list(a.read_as_jsonl())
+def save_jsonl_gz(data, filename):
+    with gzip.GzipFile(filename, 'wb') as out_file:
+        writer = codecs.getwriter('utf-8')
+        for element in data:
+            writer(out_file).write(json.dumps(element))
+            writer(out_file).write('\n')
 
 def convert_code_to_tokens(code):
     tree = my_ast.parse(code)
-    #an = SourceGenerator('    ')
-    #an.visit(tree)
-    #return an.result
-#
-for idx, sample in enumerate(b):
+    an = SourceGenerator('    ')
+    an.visit(tree)
+    return an.result
+
+path = 'resources/data/python/final/jsonl/train_old/python_train_0.jsonl.gz'
+s_path = 'resources/data/python/final/jsonl/train/python_train_0_updated.jsonl.gz'
+
+# a = json_lines.open(path, 'r')
+# s = json_lines.open(path, 'w')
+with json_lines.open(path, 'r') as a:
+    b = list(a)
+
+# print(b[0]['code'])
+# print('started')
+# b = list(a.read_as_jsonl())
+
+
+# #
+for idx, sample in enumerate(b[:2]):
     print("sample {} in progress".format(idx))
 #    print(sample['code'])
     if idx==2403:
@@ -32,7 +49,7 @@ for idx, sample in enumerate(b):
     # an.visit(tree)
     # b[idx]['code_tokens'] = an.result
 
-s.save_as_compressed_file(b)
+save_jsonl_gz(b, s_path)
 print('finished')
 
 
@@ -58,7 +75,7 @@ if __name__=='__main__':
 
     # code = '''ip = socket.gethostbyname(host)'''
     # code = '''func(a, b=c, *d, **e)'''
-    print(convert_code_to_tokens(code))
+    # print(convert_code_to_tokens(code))
 
     # b = list(map(DotDict, b))
     # b = sorted(b, key=lambda v: len(v.code_tokens))
