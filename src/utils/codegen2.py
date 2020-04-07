@@ -30,6 +30,7 @@ def to_source(node, indent_with=' ' * 4, add_line_information=False):
     generator.visit(node)
     return ''.join(map(str, generator.result))
 
+
 class SourceGenerator(NodeVisitor):
     """This visitor is able to transform a well formed syntax tree into python
     sourcecode.  For more details have a look at the docstring of the
@@ -42,23 +43,21 @@ class SourceGenerator(NodeVisitor):
         self.add_line_information = add_line_information
         self.indentation = 0
         self.new_lines = 0
-        self.first = True
         self.docstring = ''
 
     def write(self, x):
         if self.new_lines:
             if self.result:
                 self.result.append('\n' * self.new_lines)
-            if self.indentation!=0:
-                self.result.append(self.indent_with * self.indentation)
+            self.result.append(self.indent_with * self.indentation)
             self.new_lines = 0
         self.result.append(x)
 
     def newline(self, node=None, extra=0):
         self.new_lines = max(self.new_lines, 1 + extra)
         if node is not None and self.add_line_information:
-            # self.write('# line: %s' % node.lineno)
-            # self.new_lines = 1
+            #self.write('# line: %s' % node.lineno)
+            #self.new_lines = 1
             self.write('%s: ' % node.lineno)
 
     def body(self, statements):
@@ -77,7 +76,6 @@ class SourceGenerator(NodeVisitor):
 
     def signature(self, node):
         want_comma = []
-
         def write_comma():
             if want_comma:
                 self.write(', ')
@@ -87,30 +85,20 @@ class SourceGenerator(NodeVisitor):
         padding = [None] * (len(node.args) - len(node.defaults))
         for arg, default in zip(node.args, padding + node.defaults):
             write_comma()
-            self.write(arg.arg)
+            self.visit(arg)
             if default is not None:
                 self.write('=')
                 self.visit(default)
-
         if node.vararg is not None:
             write_comma()
-            self.write('*' + node.vararg.arg)
-
-        for arg, default in zip(node.kwonlyargs, node.kw_defaults):
-            write_comma()
-            self.write(arg.arg)
-            if default is not None:
-                self.write('=')
-                self.visit(default)
-
+            self.write('*' + node.vararg)
         if node.kwarg is not None:
             write_comma()
-            self.write('**' + node.kwarg.arg)
+            self.write('**' + node.kwarg)
 
     def decorators(self, node):
-        if not node:
-            print
-            "No node"
+        if not node: 
+            print "No node"
             return
         if not hasattr(node, 'decorator_list'): return
         for decorator in node.decorator_list:
@@ -121,18 +109,18 @@ class SourceGenerator(NodeVisitor):
     # Statements
 
     def visit_Assign(self, node):
-        # self.newline(node)
+        self.newline(node)
         for idx, target in enumerate(node.targets):
             if idx:
                 self.write(', ')
             self.visit(target)
-        # self.write(' = ')
+        self.write(' = ')
         self.visit(node.value)
 
     def visit_AugAssign(self, node):
         self.newline(node)
         self.visit(node.target)
-        # self.write(BINOP_SYMBOLS[type(node.op)] + '=')
+        self.write(BINOP_SYMBOLS[type(node.op)] + '=')
         self.visit(node.value)
 
     def visit_ImportFrom(self, node):
@@ -157,23 +145,16 @@ class SourceGenerator(NodeVisitor):
 
     def visit_FunctionDef(self, node):
         self.docstring = get_docstring(node, clean=False)
-        self.newline()
+        self.newline(extra=1)
         self.decorators(node)
         self.newline(node)
-        if node.decorator_list:
-            for decorator in node.decorator_list:
-                self.write('@')
-                self.visit(decorator)
-        self.write('def ')
-        self.write('%s' % node.name)
-        self.write('(')
+        self.write('def %s(' % node.name)
         self.signature(node.args)
         self.write('):')
         self.body(node.body)
 
     def visit_ClassDef(self, node):
         have_args = []
-
         def paren_or_comma():
             if have_args:
                 self.write(', ')
@@ -195,11 +176,11 @@ class SourceGenerator(NodeVisitor):
                 paren_or_comma()
                 self.write(keyword.arg + '=')
                 self.visit(keyword.value)
-            if hasattr(node, 'starargs') and node.starargs is not None:
+            if node.starargs is not None:
                 paren_or_comma()
                 self.write('*')
                 self.visit(node.starargs)
-            if hasattr(node, 'kwargs') and node.kwargs is not None:
+            if node.kwargs is not None:
                 paren_or_comma()
                 self.write('**')
                 self.visit(node.kwargs)
@@ -228,6 +209,7 @@ class SourceGenerator(NodeVisitor):
                 break
             else:
                 break
+                
 
     def visit_For(self, node):
         self.newline(node)
@@ -248,11 +230,10 @@ class SourceGenerator(NodeVisitor):
     def visit_With(self, node):
         self.newline(node)
         self.write('with ')
-        for item in node.items:
-            self.visit(item.context_expr)
-            if item.optional_vars is not None:
-                self.write(' as ')
-                self.visit(item.optional_vars)
+        self.visit(node.context_expr)
+        if node.optional_vars is not None:
+            self.write(' as ')
+            self.visit(node.optional_vars)
         self.write(':')
         self.body(node.body)
 
@@ -284,29 +265,6 @@ class SourceGenerator(NodeVisitor):
             if idx:
                 self.write(', ')
             self.visit(target)
-
-    def visit_Try(self, node):
-        self.newline(node)
-        #try block
-        self.write('try:')
-        self.body(node.body)
-        self.newline(node)
-
-        #except block
-        for handler in node.handlers:
-            self.visit(handler)
-
-        #except else
-        if len(node.orelse):
-            self.write('else:')
-            self.body(node.orelse)
-
-        #except finally
-        if len(node.finalbody):
-            self.write('finally:')
-            self.body(node.finalbody)
-
-
 
     def visit_TryExcept(self, node):
         self.newline(node)
@@ -368,12 +326,10 @@ class SourceGenerator(NodeVisitor):
 
     def visit_Attribute(self, node):
         self.visit(node.value)
-        self.write('.')
-        self.write(node.attr)
+        self.write('.' + node.attr)
 
     def visit_Call(self, node):
         want_comma = []
-
         def write_comma():
             if want_comma:
                 self.write(', ')
@@ -387,21 +343,16 @@ class SourceGenerator(NodeVisitor):
             self.visit(arg)
         for keyword in node.keywords:
             write_comma()
-            if keyword.arg:
-                self.write(keyword.arg + '=')
-                self.visit(keyword.value)
-            else:
-                self.write('**')
-                self.visit(keyword.value)
-
-        # if hasattr(node, 'starargs') and node.starargs is not None:
-        #     write_comma()
-        #     self.write('*')
-        #     self.visit(node.starargs)
-        # if hasattr(node, 'kwargs') and node.kwargs is not None:
-        #     write_comma()
-        #     self.write('**')
-        #     self.visit(node.kwargs)
+            self.write(keyword.arg + '=')
+            self.visit(keyword.value)
+        if node.starargs is not None:
+            write_comma()
+            self.write('*')
+            self.visit(node.starargs)
+        if node.kwargs is not None:
+            write_comma()
+            self.write('**')
+            self.visit(node.kwargs)
         self.write(')')
 
     def visit_Name(self, node):
@@ -422,7 +373,7 @@ class SourceGenerator(NodeVisitor):
         idx = -1
         for idx, item in enumerate(node.elts):
             if idx:
-                self.write(',')
+                self.write(', ')
             self.visit(item)
         self.write(idx and ')' or ',)')
 
@@ -434,7 +385,6 @@ class SourceGenerator(NodeVisitor):
                     self.write(', ')
                 self.visit(item)
             self.write(right)
-
         return visit
 
     visit_List = sequence_visit('[', ']')
@@ -446,18 +396,14 @@ class SourceGenerator(NodeVisitor):
         for idx, (key, value) in enumerate(zip(node.keys, node.values)):
             if idx:
                 self.write(', ')
-            if key!=None:
-                self.visit(key)
-                self.write(': ')
-                self.visit(value)
-            elif key==None:
-                self.write('**')
-                self.visit(value)
+            self.visit(key)
+            self.write(': ')
+            self.visit(value)
         self.write('}')
 
     def visit_BinOp(self, node):
         self.visit(node.left)
-        # self.write('%s' % BINOP_SYMBOLS[type(node.op)])
+        self.write(' %s ' % BINOP_SYMBOLS[type(node.op)])
         self.visit(node.right)
 
     def visit_BoolOp(self, node):
@@ -529,7 +475,6 @@ class SourceGenerator(NodeVisitor):
             for comprehension in node.generators:
                 self.visit(comprehension)
             self.write(right)
-
         return visit
 
     visit_ListComp = generator_visit('[', ']')
@@ -580,7 +525,7 @@ class SourceGenerator(NodeVisitor):
                 self.write(' if ')
                 self.visit(if_)
 
-    def visit_ExceptHandler(self, node):
+    def visit_excepthandler(self, node):
         self.newline(node)
         self.write('except')
         if node.type is not None:
@@ -588,18 +533,6 @@ class SourceGenerator(NodeVisitor):
             self.visit(node.type)
             if node.name is not None:
                 self.write(', ')
-                self.write(node.name)
+                self.visit(node.name)
         self.write(':')
         self.body(node.body)
-
-    # def visit_exceptHandler(self, node):
-    #     self.newline(node)
-    #     self.write('except')
-    #     if node.type is not None:
-    #         self.write(' ')
-    #         self.visit(node.type)
-    #         if node.name is not None:
-    #             self.write(', ')
-    #             self.visit(node.name)
-    #     self.write(':')
-    #     self.body(node.body)

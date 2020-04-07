@@ -44,7 +44,8 @@ BINOP_SYMBOLS = {
     RShift:     '>>',
     BitOr:      '|',
     BitAnd:     '&',
-    BitXor:     '^'
+    BitXor:     '^',
+    Pow:        '**'
 }
 
 CMPOP_SYMBOLS = {
@@ -251,15 +252,15 @@ def get_docstring(node, clean=True):
     If *clean* is `True`, all tabs are expanded to spaces and any whitespace
     that can be uniformly removed from the second line onwards is removed.
     """
-    if not isinstance(node, (AsyncFunctionDef, FunctionDef, ClassDef, Module)):
+    if not isinstance(node, (FunctionDef, ClassDef, Module)):
         raise TypeError("%r can't have docstrings" % node.__class__.__name__)
     if not(node.body and isinstance(node.body[0], Expr)):
         return None
     node = node.body[0].value
     if isinstance(node, Str):
         text = node.s
-    elif isinstance(node, Constant) and isinstance(node.value, str):
-        text = node.value
+    # elif isinstance(node, Constant) and isinstance(node.value, str):
+    #     text = node.value
     else:
         return None
     if clean:
