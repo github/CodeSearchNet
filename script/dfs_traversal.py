@@ -4,9 +4,11 @@ from utils.my_utils import DotDict
 from utils import my_ast
 from utils.codegen import *
 import pandas as pd
+import subprocess
+import os
 
-path = '../resources/data/python/final/jsonl/train_old/python_train_0.jsonl.gz'
-s_path = '../resources/data/python/final/jsonl/train/python_train_0_updated.jsonl.gz'
+path = '../resources/data/python/final/jsonl/valid_old/python_valid_0.jsonl.gz'
+s_path = '../resources/data/python/final/jsonl/valid/python_valid_0_updated.jsonl.gz'
 
 a = RichPath.create(path)
 s = RichPath.create(s_path)
@@ -14,30 +16,59 @@ s = RichPath.create(s_path)
 print('started')
 b = list(a.read_as_jsonl())
 
+
+count = 0
 def convert_code_to_tokens(code):
-    tree = my_ast.parse(code)
-    #an = SourceGenerator('    ')
-    #an.visit(tree)
-    #return an.result
+    global count
+    tree =''
+    # tree = my_ast.parse(code)
+
+    try:
+        tree = my_ast.parse(code)
+    except:
+        try:
+            f = open('temp.py', 'w+')
+            f.write(code)
+            f.close()
+            subprocess.run(['2to3', '-w', 'temp.py'])
+            f = open('temp.py', 'r')
+            code = f.read()
+            # print(code)
+            tree = my_ast.parse(code)
+            # os.rmdir('temp.py')
+        except:
+            pass
+    if tree!='':
+        an = SourceGenerator('    ')
+        an.visit(tree)
+        return an.result
+    else:
+        return []
 #
+
+templist = []
 for idx, sample in enumerate(b):
     print("sample {} in progress".format(idx))
 #    print(sample['code'])
-    if idx==2403:
+    if idx==3282:
         print(sample['code'])
 
-    b[idx]['code_tokens'] = convert_code_to_tokens(sample['code'])
+    tokenization = convert_code_to_tokens(sample['code'])
+    if tokenization == []:
+        templist.append(idx)
+    else:
+        b[idx]['code_tokens'] = tokenization
     # tree = my_ast.parse(sample['code'])
     # an = SourceGenerator('    ')
     # an.visit(tree)
     # b[idx]['code_tokens'] = an.result
 
 s.save_as_compressed_file(b)
-print('finished')
+# print('finished', templist, len(templist), tokenization)
 
 
-
-
+# a = [3282, 10821, 15646, 15806, 15868, 15907, 15908, 15909, 15912, 15913, 15915, 15926, 16107, 16255, 16259, 16261, 16337, 16373, 16374, 16378, 16379, 16389, 16390, 16392, 16907, 16966, 16971, 17139, 17179, 21304, 21305]
+#b  = [10821, 21304]
 
 
 if __name__=='__main__':
@@ -58,7 +89,7 @@ if __name__=='__main__':
 
     # code = '''ip = socket.gethostbyname(host)'''
     # code = '''func(a, b=c, *d, **e)'''
-    print(convert_code_to_tokens(code))
+    # print(convert_code_to_tokens(code))
 
     # b = list(map(DotDict, b))
     # b = sorted(b, key=lambda v: len(v.code_tokens))

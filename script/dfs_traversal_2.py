@@ -1,8 +1,9 @@
+from yapf.yapflib import pytree_utils
 
 # from src.dpu_utils.utils import RichPath
 from src.utils.my_utils import DotDict
 from src.utils import my_ast
-from src.utils.codegen import *
+from src.utils.codegen2 import *
 import json_lines
 import gzip
 import codecs
@@ -16,12 +17,22 @@ def save_jsonl_gz(data, filename):
         for element in data:
             writer(out_file).write(json.dumps(element))
             writer(out_file).write('\n')
-
+count = 0
 def convert_code_to_tokens(code):
-    tree = my_ast.parse(code)
-    an = SourceGenerator('    ')
-    an.visit(tree)
-    return an.result
+    global count
+    tree = ''
+    try:
+        tree = my_ast.parse(code)
+    except:
+        count+=1
+    
+    if tree=='':
+        return []
+    else:
+        an = SourceGenerator('    ')
+        an.visit(tree)
+        return an.result
+
 
 path = 'resources/data/python/final/jsonl/train_old/python_train_0.jsonl.gz'
 s_path = 'resources/data/python/final/jsonl/train/python_train_0_updated.jsonl.gz'
@@ -35,21 +46,21 @@ with json_lines.open(path, 'r') as a:
 # print('started')
 # b = list(a.read_as_jsonl())
 
-
 # #
-for idx, sample in enumerate(b[:2]):
+for idx, sample in enumerate(b):
+    global count
     print("sample {} in progress".format(idx))
 #    print(sample['code'])
-    if idx==2403:
-        print(sample['code'])
-
-    b[idx]['code_tokens'] = convert_code_to_tokens(sample['code'])
+    # print(sample['code'])
+    updated_tokens = convert_code_to_tokens(sample['code'])
+    b[idx]['code_tokens'] = updated_tokens
     # tree = my_ast.parse(sample['code'])
     # an = SourceGenerator('    ')
     # an.visit(tree)
     # b[idx]['code_tokens'] = an.result
 
-save_jsonl_gz(b, s_path)
+print(count)
+# save_jsonl_gz(b, s_path)
 print('finished')
 
 

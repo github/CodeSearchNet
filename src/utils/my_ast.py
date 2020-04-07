@@ -44,7 +44,8 @@ BINOP_SYMBOLS = {
     RShift:     '>>',
     BitOr:      '|',
     BitAnd:     '&',
-    BitXor:     '^'
+    BitXor:     '^',
+    Pow:        '**'
 }
 
 CMPOP_SYMBOLS = {
@@ -258,8 +259,8 @@ def get_docstring(node, clean=True):
     node = node.body[0].value
     if isinstance(node, Str):
         text = node.s
-    elif isinstance(node, Constant) and isinstance(node.value, str):
-        text = node.value
+    # elif isinstance(node, Constant) and isinstance(node.value, str):
+    #     text = node.value
     else:
         return None
     if clean:
