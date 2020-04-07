@@ -1,14 +1,12 @@
 
 from dpu_utils.utils import RichPath
-from utils.my_utils import DotDict
-from utils import my_ast
-from utils.codegen import *
-import pandas as pd
+from src.utils import my_ast
+from src.utils.codegen import *
 import subprocess
 import os
 
-path = '../resources/data/python/final/jsonl/valid_old/python_valid_0.jsonl.gz'
-s_path = '../resources/data/python/final/jsonl/valid/python_valid_0_updated.jsonl.gz'
+path = 'resources/data/python/final/jsonl/valid_old/python_valid_0.jsonl.gz'
+s_path = 'resources/data/python/final/jsonl/valid/python_valid_0_updated.jsonl.gz'
 
 a = RichPath.create(path)
 s = RichPath.create(s_path)
@@ -64,7 +62,7 @@ for idx, sample in enumerate(b):
     # b[idx]['code_tokens'] = an.result
 
 s.save_as_compressed_file(b)
-# print('finished', templist, len(templist), tokenization)
+print('finished', templist, len(templist), tokenization)
 
 
 # a = [3282, 10821, 15646, 15806, 15868, 15907, 15908, 15909, 15912, 15913, 15915, 15926, 16107, 16255, 16259, 16261, 16337, 16373, 16374, 16378, 16379, 16389, 16390, 16392, 16907, 16966, 16971, 17139, 17179, 21304, 21305]
