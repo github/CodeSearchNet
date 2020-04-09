@@ -5,8 +5,8 @@ from src.utils.codegen import *
 import subprocess
 import os
 
-path = 'resources/data/python/final/jsonl/valid_old/python_valid_0.jsonl.gz'
-s_path = 'resources/data/python/final/jsonl/valid/python_valid_0_updated.jsonl.gz'
+path = '../resources/data/python/final/jsonl/valid_old/python_valid_0.jsonl.gz'
+s_path = '../resources/data/python/final/jsonl/valid/python_valid_0_updated.jsonl.gz'
 
 a = RichPath.create(path)
 s = RichPath.create(s_path)
@@ -14,6 +14,7 @@ s = RichPath.create(s_path)
 print('started')
 b = list(a.read_as_jsonl())
 
+c=[]
 
 count = 0
 def convert_code_to_tokens(code):
@@ -48,7 +49,7 @@ templist = []
 for idx, sample in enumerate(b):
     print("sample {} in progress".format(idx))
 #    print(sample['code'])
-    if idx==3282:
+    if idx==5306:
         print(sample['code'])
 
     tokenization = convert_code_to_tokens(sample['code'])
@@ -56,12 +57,13 @@ for idx, sample in enumerate(b):
         templist.append(idx)
     else:
         b[idx]['code_tokens'] = tokenization
+        c.append(b[idx])
     # tree = my_ast.parse(sample['code'])
     # an = SourceGenerator('    ')
     # an.visit(tree)
     # b[idx]['code_tokens'] = an.result
 
-s.save_as_compressed_file(b)
+s.save_as_compressed_file(c)
 print('finished', templist, len(templist), tokenization)
 
 
