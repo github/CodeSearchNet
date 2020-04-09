@@ -304,16 +304,21 @@ class NodeVisitor(object):
     """
     first_type = True
 
-    def visit(self, node):
+    def visit(self, node, parent=None):
         """Visit a node."""
         method = 'visit_' + node.__class__.__name__
         visitor = getattr(self, method, self.generic_visit)
+
         if type(node) ==Expr:
             pass
         elif type(node)==Str and self.docstring == node.s:
             pass
         else:
             self.write(node.__class__.__name__)
+            if parent:
+                self.parents.append(type(parent).__name__)
+            else:
+                self.parents.append(None)
         return visitor(node)
 
     def generic_visit(self, node):
@@ -322,9 +327,9 @@ class NodeVisitor(object):
             if isinstance(value, list):
                 for item in value:
                     if isinstance(item, AST):
-                        self.visit(item)
+                        self.visit(item, node)
             elif isinstance(value, AST):
-                self.visit(value)
+                self.visit(value, node)
 
 
 class NodeTransformer(NodeVisitor):
