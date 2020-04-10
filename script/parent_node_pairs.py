@@ -44,8 +44,8 @@ if __name__=='__main__':
 
     #[26045, 28475]
 
-    path = '../resources/data/python/final/jsonl/train_old/python_train_0.jsonl.gz'
-    s_path = '../resources/data/python/final/jsonl/train/python_train_0_dfs_parent.jsonl.gz'
+    path = '../resources/data/python/final/jsonl/train_old/temp_train_10.jsonl.gz'
+    s_path = '../resources/data/python/final/jsonl/train/temp_train_10_dfs_parent.jsonl.gz'
 
     a = RichPath.create(path)
     s = RichPath.create(s_path)
@@ -54,10 +54,9 @@ if __name__=='__main__':
     b = list(a.read_as_jsonl())
 
     b = sorted(b, key=lambda v: len(v['code_tokens']))
-
     templist = []
     c = []
-    for idx, sample in enumerate(b[10000:30000],10000):
+    for idx, sample in enumerate(b):
         print("sample {} in progress".format(idx))
         # print(sample['code'])
 
