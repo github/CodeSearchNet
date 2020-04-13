@@ -15,7 +15,7 @@ class SelfAttentionEncoder(MaskedSeqEncoder):
                           'self_attention_intermediate_size': 512,
                           'self_attention_num_layers': 3,
                           'self_attention_num_heads': 8,
-                          'self_attention_pool_mode': 'weighted_mean',
+                          'self_attention_pool_mode': 'weighted_mean'
                           }
         hypers = super().get_default_hyperparameters()
         hypers.update(encoder_hypers)
@@ -32,6 +32,18 @@ class SelfAttentionEncoder(MaskedSeqEncoder):
         with tf.variable_scope("self_attention_encoder"):
             self._make_placeholders()
 
+            if self.label == "code" and self.hyperparameters['use_parent']:
+                self.placeholders['parent_tokens']  = tf.placeholder(tf.int32,
+                               shape=[None, self.get_hyper('max_num_tokens')],
+                               name='parent_tokens')
+
+                self.placeholders['parent_tokens_mask']  = tf.placeholder(tf.int32,
+                               shape=[None, self.get_hyper('max_num_tokens')],
+                               name='parent_tokens_mask')
+            else:
+                self.placeholders['parent_tokens'] = None
+                self.placeholders['parent_tokens_mask'] = None
+
             config = BertConfig(vocab_size=self.get_hyper('token_vocab_size'),
                                 hidden_size=self.get_hyper('self_attention_hidden_size'),
                                 num_hidden_layers=self.get_hyper('self_attention_num_layers'),
@@ -40,9 +52,11 @@ class SelfAttentionEncoder(MaskedSeqEncoder):
 
             model = BertModel(config=config,
                               is_training=is_train,
-                              input_ids=self.placeholders['tokens'],
+                              input_ids= self.placeholders['tokens'],
                               input_mask=self.placeholders['tokens_mask'],
-                              use_one_hot_embeddings=False)
+                              use_one_hot_embeddings=False,
+                              parent_ids=self.placeholders['parent_tokens'],
+                              parent_mask=self.placeholders['parent_tokens_mask'])
 
             output_pool_mode = self.get_hyper('self_attention_pool_mode').lower()
             if output_pool_mode == 'bert':

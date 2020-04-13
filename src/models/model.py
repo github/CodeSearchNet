@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict, OrderedDict
 from enum import Enum, auto
 from typing import List, Dict, Any, Iterable, Tuple, Optional, Union, Callable, Type, DefaultDict
+from tensorflow.python import debug as tf_debug
 
 import numpy as np
 import wandb
@@ -19,7 +20,7 @@ from encoders import Encoder, QueryType
 
 LoadedSamples = Dict[str, List[Dict[str, Any]]]
 SampleId = Tuple[str, int]
-
+from pprint import pprint
 
 class RepresentationType(Enum):
     CODE = auto()
@@ -62,7 +63,8 @@ def parse_data_file(hyperparameters: Dict[str, Any],
                                                                  raw_sample['code_tokens'],
                                                                  function_name,
                                                                  sample,
-                                                                 is_test)
+                                                                 is_test,
+                                                                 raw_sample['parent_dfs'])
 
         use_query_flag = query_encoder_class.load_data_from_sample("query",
                                                                    hyperparameters,
@@ -71,6 +73,7 @@ def parse_data_file(hyperparameters: Dict[str, Any],
                                                                    function_name,
                                                                    sample,
                                                                    is_test)
+
         use_example = use_code_flag and use_query_flag
         results[language].append((use_example, sample))
     return results
@@ -152,7 +155,7 @@ class Model(ABC):
 
         graph = tf.Graph()
         self.__sess = tf.Session(graph=graph, config=config)
-
+        
         # save directory as tensorboard.
         self.__tensorboard_dir = log_save_dir
 
@@ -223,6 +226,7 @@ class Model(ABC):
         print(msg.encode('ascii', errors='replace').decode())
 
     def make_model(self, is_train: bool):
+        # tf.enable_eager_execution()
         with self.__sess.graph.as_default():
             random.seed(self.hyperparameters['seed'])
             np.random.seed(self.hyperparameters['seed'])
@@ -504,7 +508,7 @@ class Model(ABC):
         for (language, language_encoder) in self.__code_encoders.items():
             batch_data['per_language_query_data'][language] = {}
             batch_data['per_language_query_data'][language]['query_sample_ids'] = []
-            self.__query_encoder.init_minibatch(batch_data['per_language_query_data'][language])
+            self.__query_encoder.init_minibatch(batch_data['per_language_query_data'][language], code=False)
             batch_data['per_language_code_data'][language] = {}
             batch_data['per_language_code_data'][language]['code_sample_ids'] = []
             language_encoder.init_minibatch(batch_data['per_language_code_data'][language])
@@ -722,6 +726,8 @@ class Model(ABC):
             ops_to_run = {'loss': self.__ops['loss'], 'mrr': self.__ops['mrr']}
             if is_train:
                 ops_to_run['train_step'] = self.__ops['train_step']
+
+            # print(batch_data_dict)
             op_results = self.__sess.run(ops_to_run, feed_dict=batch_data_dict)
             assert not np.isnan(op_results['loss'])
 

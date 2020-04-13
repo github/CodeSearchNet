@@ -18,6 +18,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import tensorflow.contrib.eager as tfe
+
+
 import collections
 import copy
 import json
@@ -137,7 +140,9 @@ class BertModel(object):
                token_type_ids=None,
                use_one_hot_embeddings=True,
                scope=None,
-               embedded_input=None):
+               embedded_input=None,
+               parent_ids=None,
+               parent_mask=None):
     """Constructor for BertModel.
 
     Args:
@@ -160,6 +165,7 @@ class BertModel(object):
       ValueError: The config is invalid or one of the input tensor shapes
         is invalid.
     """
+
     config = copy.deepcopy(config)
     if not is_training:
       config.hidden_dropout_prob = 0.0
@@ -179,6 +185,7 @@ class BertModel(object):
       with tf.variable_scope("embeddings"):
         if embedded_input is None:
           # Perform embedding lookup on the word ids.
+          #returns a vector of B x SeqLength x hidden_size
           (self.embedding_output, self.embedding_table) = embedding_lookup(
               input_ids=input_ids,
               vocab_size=config.vocab_size,
@@ -186,6 +193,7 @@ class BertModel(object):
               initializer_range=config.initializer_range,
               word_embedding_name="word_embeddings",
               use_one_hot_embeddings=use_one_hot_embeddings)
+
         else:
           self.embedding_output = embedded_input
 
@@ -212,18 +220,65 @@ class BertModel(object):
 
         # Run the stacked transformer.
         # `sequence_output` shape = [batch_size, seq_length, hidden_size].
-        self.all_encoder_layers = transformer_model(
-            input_tensor=self.embedding_output,
-            attention_mask=attention_mask,
-            hidden_size=config.hidden_size,
-            num_hidden_layers=config.num_hidden_layers,
-            num_attention_heads=config.num_attention_heads,
-            intermediate_size=config.intermediate_size,
-            intermediate_act_fn=get_activation(config.hidden_act),
-            hidden_dropout_prob=config.hidden_dropout_prob,
-            attention_probs_dropout_prob=config.attention_probs_dropout_prob,
-            initializer_range=config.initializer_range,
-            do_return_all_layers=True)
+
+        if parent_ids is not None:
+
+            if parent_mask is None:
+                parent_mask = tf.ones(shape=[batch_size, seq_length], dtype=tf.int32)
+
+            parent_attention_mask = create_attention_mask_from_input_mask(
+                    parent_ids, parent_mask)
+
+
+            parent_embedding_output, parent_embedding_table = embedding_lookup(
+                input_ids=parent_ids,
+                vocab_size=config.vocab_size,
+                embedding_size=config.hidden_size,
+                initializer_range=config.initializer_range,
+                word_embedding_name="word_embeddings",
+                use_one_hot_embeddings=use_one_hot_embeddings)
+
+            parent_embedding_output = embedding_postprocessor(
+                input_tensor=parent_embedding_output,
+                use_token_type=True,
+                token_type_ids=token_type_ids,
+                token_type_vocab_size=config.type_vocab_size,
+                token_type_embedding_name="token_type_embeddings",
+                use_position_embeddings=True,
+                position_embedding_name="position_embeddings",
+                initializer_range=config.initializer_range,
+                max_position_embeddings=config.max_position_embeddings,
+                dropout_prob=config.hidden_dropout_prob)
+
+
+
+            self.all_encoder_layers = transformer_model(
+                input_tensor=self.embedding_output,
+                attention_mask=attention_mask,
+                hidden_size=config.hidden_size,
+                num_hidden_layers=config.num_hidden_layers,
+                num_attention_heads=config.num_attention_heads,
+                intermediate_size=config.intermediate_size,
+                intermediate_act_fn=get_activation(config.hidden_act),
+                hidden_dropout_prob=config.hidden_dropout_prob,
+                attention_probs_dropout_prob=config.attention_probs_dropout_prob,
+                initializer_range=config.initializer_range,
+                do_return_all_layers=True,
+                parent_tensor=parent_embedding_output,
+                parent_attention_mask=parent_attention_mask)
+        else:
+            self.all_encoder_layers = transformer_model(
+                input_tensor=self.embedding_output,
+                attention_mask=attention_mask,
+                hidden_size=config.hidden_size,
+                num_hidden_layers=config.num_hidden_layers,
+                num_attention_heads=config.num_attention_heads,
+                intermediate_size=config.intermediate_size,
+                intermediate_act_fn=get_activation(config.hidden_act),
+                hidden_dropout_prob=config.hidden_dropout_prob,
+                attention_probs_dropout_prob=config.attention_probs_dropout_prob,
+                initializer_range=config.initializer_range,
+                do_return_all_layers=True)
 
       self.sequence_output = self.all_encoder_layers[-1]
       # The "pooler" converts the encoded sequence tensor of shape
@@ -519,7 +574,6 @@ def create_attention_mask_from_input_mask(from_tensor, to_mask):
 
   return mask
 
-
 def attention_layer(from_tensor,
                     to_tensor,
                     attention_mask=None,
@@ -686,7 +740,7 @@ def attention_layer(from_tensor,
 
   # This is actually dropping out entire tokens to attend to, which might
   # seem a bit unusual, but is taken from the original Transformer paper.
-  attention_probs = dropout(attention_probs, attention_probs_dropout_prob)
+  # attention_probs = dropout(attention_probs, attention_probs_dropout_prob)
 
   # `value_layer` = [B, T, N, H]
   value_layer = tf.reshape(
@@ -726,7 +780,9 @@ def transformer_model(input_tensor,
                       hidden_dropout_prob=0.1,
                       attention_probs_dropout_prob=0.1,
                       initializer_range=0.02,
-                      do_return_all_layers=False):
+                      do_return_all_layers=False,
+                      parent_tensor=None,
+                      parent_attention_mask=None):
   """Multi-headed, multi-layer Transformer from "Attention is All You Need".
 
   This is almost an exact implementation of the original Transformer encoder.
@@ -786,6 +842,7 @@ def transformer_model(input_tensor,
   # the GPU/CPU but may not be free on the TPU, so we want to minimize them to
   # help the optimizer.
   prev_output = reshape_to_matrix(input_tensor)
+  old_attention_head = num_attention_heads
 
   all_layer_outputs = []
   for layer_idx in range(num_hidden_layers):
@@ -794,6 +851,37 @@ def transformer_model(input_tensor,
 
       with tf.variable_scope("attention"):
         attention_heads = []
+        num_attention_heads = old_attention_head
+        if parent_tensor is not None:
+            with tf.variable_scope('parent'):
+                attention_head_size = int(hidden_size / num_attention_heads)
+                parent_shape = get_shape_list(parent_tensor, expected_rank=3)
+                parent_input_width = parent_shape[2]
+
+                if parent_input_width != hidden_size:
+                    raise ValueError("The width of the input tensor (%d) != hidden size (%d)" %
+                                     (parent_input_width, hidden_size))
+
+                parent_reshaped_tensor = reshape_to_matrix(parent_tensor)
+
+                attention_head = attention_layer(
+                    from_tensor=layer_input,
+                    to_tensor=parent_reshaped_tensor,
+                    attention_mask=parent_attention_mask,
+                    num_attention_heads=1,
+                    size_per_head=attention_head_size,
+                    attention_probs_dropout_prob=attention_probs_dropout_prob,
+                    initializer_range=initializer_range,
+                    do_return_2d_tensor=True,
+                    batch_size=batch_size,
+                    from_seq_length=seq_length,
+                    to_seq_length=seq_length)
+
+                attention_heads.append(attention_head)
+                old_attention_head = num_attention_heads
+                num_attention_heads = num_attention_heads-1
+                parent_tensor = None
+
         with tf.variable_scope("self"):
           attention_head = attention_layer(
               from_tensor=layer_input,
@@ -949,3 +1037,73 @@ def assert_rank(tensor, expected_rank, name=None):
         "For the tensor `%s` in scope `%s`, the actual rank "
         "`%d` (shape = %s) is not equal to the expected rank `%s`" %
         (name, scope_name, actual_rank, str(tensor.shape), str(expected_rank)))
+
+
+
+
+if __name__=='__main__':
+    print('something')
+
+    x = tf.placeholder(tf.float32, shape=[None, 4])
+    y = tf.placeholder(tf.float32, shape=[None, 4])
+
+    # test = tf.layers.dense(
+    #     x,
+    #     2 * 3,
+    #     activation=None,
+    #     kernel_initializer=create_initializer(0.02))
+
+
+    from_tensor = x
+    to_tensor = y
+    context = attention_layer(from_tensor, to_tensor, num_attention_heads=1, size_per_head=4, batch_size=1, from_seq_length=2, to_seq_length=2)
+    # transformer = transformer_model(from_tensor,
+    #                   attention_mask=None,
+    #                   hidden_size=4,
+    #                   num_hidden_layers=1,
+    #                   num_attention_heads=1,
+    #                   intermediate_size=4,
+    #                   intermediate_act_fn=get_activation('gelu'),
+    #                   hidden_dropout_prob=0.1,
+    #                   attention_probs_dropout_prob=0.1,
+    #                   initializer_range=0.02,
+    #                   do_return_all_layers=False)
+    #
+    # input_ids = tf.constant([[31, 51, 99, 100], [15, 5, 0, 200]])
+    # input_mask = tf.constant([[1, 1, 1, 1], [1, 1, 0, 1]])
+    # token_type_ids = tf.constant([[0, 0, 1, 1], [0, 2, 0, 1]])
+
+    # config = BertConfig(vocab_size=4, hidden_size=1,
+    #                              num_hidden_layers=1, num_attention_heads=1, intermediate_size=4)
+    #
+    # model = BertModel(config=config, is_training=True,
+    #                            input_ids=input_ids, input_mask=input_mask, token_type_ids=token_type_ids)
+    #
+    # return_value = model.get_pooled_output()
+
+    '''python
+    # Already been converted into WordPiece token ids
+    input_ids = tf.constant([[31, 51, 99], [15, 5, 0]])
+    input_mask = tf.constant([[1, 1, 1], [1, 1, 0]])
+    token_type_ids = tf.constant([[0, 0, 1], [0, 2, 0]])
+
+    config = modeling.BertConfig(vocab_size=32000, hidden_size=512,
+                                 num_hidden_layers=8, num_attention_heads=6, intermediate_size=1024)
+
+    model = modeling.BertModel(config=config, is_training=True,
+                               input_ids=input_ids, input_mask=input_mask, token_type_ids=token_type_ids)
+
+    label_embeddings = tf.get_variable(...)
+    pooled_output = model.get_pooled_output()
+    logits = tf.matmul(pooled_output, label_embeddings)'''
+
+
+    sess = tf.InteractiveSession()
+
+    tf.global_variables_initializer().run()
+
+    # print(print('Loss(x,y) = {}'.format(sess.run([model], {x: [["t","2","a","a"], ["a","b","c","d"]]}))))
+
+    print(print('Loss(x,y) = {}'.format(sess.run([context], {x:[[1,2,3,4], [11,12,13,19]], y:[[1,2,3,4], [11,12,13,19]]}))))
+
+    print(print('Loss(x,y) = {}'.format(sess.run([context], {x:[[1,2,3,4], [11,12,13,19]], y:[[6,7,8,9], [20,21,22,23]]}))))
