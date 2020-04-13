@@ -128,7 +128,8 @@ class SeqEncoder(Encoder):
                               data_to_load: Any,
                               function_name: Optional[str],
                               result_holder: Dict[str, Any],
-                              is_test: bool = True) -> bool:
+                              is_test: bool = True,
+                              parent_tokens=False) -> bool:
         """
         Saves two versions of both the code and the query: one using the docstring as the query and the other using the
         function-name as the query, and replacing the function name in the code with an out-of-vocab token.
@@ -168,6 +169,17 @@ class SeqEncoder(Encoder):
             result_holder[f'{encoder_label}_tokens_mask_{key}'] = tokens_mask
             result_holder[f'{encoder_label}_tokens_length_{key}'] = int(np.sum(tokens_mask))
 
+            if parent_tokens:
+                parent_tokens[0] = Vocabulary.get_unk()
+                tokens, tokens_mask = \
+                    convert_and_pad_token_sequence(metadata['token_vocab'], list(parent_tokens),
+                                                   hyperparameters[f'{encoder_label}_max_num_tokens'])
+                # Note that we share the result_holder with different encoders, and so we need to make our identifiers
+                # unique-ish
+                result_holder[f'{encoder_label}_parent_tokens_{key}'] = tokens
+                result_holder[f'{encoder_label}_parent_tokens_mask_{key}'] = tokens_mask
+                result_holder[f'{encoder_label}_parent_tokens_length_{key}'] = int(np.sum(tokens_mask))
+
         if result_holder[f'{encoder_label}_tokens_mask_{QueryType.DOCSTRING.value}'] is None or \
                 int(np.sum(result_holder[f'{encoder_label}_tokens_mask_{QueryType.DOCSTRING.value}'])) == 0:
             return False
@@ -186,6 +198,11 @@ class SeqEncoder(Encoder):
         current_sample['tokens'] = sample[f'{self.label}_tokens_{query_type}']
         current_sample['tokens_mask'] = sample[f'{self.label}_tokens_mask_{query_type}']
         current_sample['tokens_lengths'] = sample[f'{self.label}_tokens_length_{query_type}']
+
+        if self.label == 'code':
+            current_sample['parent_tokens'] = sample[f'{self.label}_parent_tokens_{query_type}']
+            current_sample['parent_tokens_mask'] = sample[f'{self.label}_parent_tokens_mask_{query_type}']
+            current_sample['parent_tokens_lengths'] = sample[f'{self.label}_parent_tokens_length_{query_type}']
 
         # In the query, randomly add high-frequency tokens:
         # TODO: Add tokens with frequency proportional to their frequency in the vocabulary
