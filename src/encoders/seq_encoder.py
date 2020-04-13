@@ -170,7 +170,7 @@ class SeqEncoder(Encoder):
             result_holder[f'{encoder_label}_tokens_length_{key}'] = int(np.sum(tokens_mask))
 
             if parent_tokens:
-                parent_tokens[0] = Vocabulary.get_unk()
+                parent_tokens = [Vocabulary.get_unk() if token==None else token for token in parent_tokens]
                 tokens, tokens_mask = \
                     convert_and_pad_token_sequence(metadata['token_vocab'], list(parent_tokens),
                                                    hyperparameters[f'{encoder_label}_max_num_tokens'])

@@ -4,7 +4,7 @@ from src.utils import my_ast
 from src.utils.codegen import *
 import subprocess
 
-from parent_node_parse_helpers import dfs_traversal_with_parents
+from .parent_node_parse_helpers import dfs_traversal_with_parents
 import pandas as pd
 import os
 
@@ -44,8 +44,8 @@ if __name__=='__main__':
 
     #[26045, 28475]
 
-    path = '../resources/data/python/final/jsonl/valid_old/temp_valid_10.jsonl.gz'
-    s_path = '../resources/data/python/final/jsonl/valid/temp_valid_10_dfs_parent.jsonl.gz'
+    path = 'resources/data/python/final/jsonl/old_train/python_train_0.jsonl.gz'
+    s_path = 'resources/data/python/final/jsonl/train/python_train_0_dfs_parent.jsonl.gz'
 
     a = RichPath.create(path)
     s = RichPath.create(s_path)
