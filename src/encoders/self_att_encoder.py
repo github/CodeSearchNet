@@ -33,6 +33,7 @@ class SelfAttentionEncoder(MaskedSeqEncoder):
             self._make_placeholders()
 
             if self.label == "code" and self.hyperparameters['use_parent']:
+                print("USING PARENT NODE CONNECTIONS")
                 self.placeholders['parent_tokens']  = tf.placeholder(tf.int32,
                                shape=[None, self.get_hyper('max_num_tokens')],
                                name='parent_tokens')
