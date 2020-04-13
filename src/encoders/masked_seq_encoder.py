@@ -29,12 +29,19 @@ class MaskedSeqEncoder(SeqEncoder):
                            shape=[None, self.get_hyper('max_num_tokens')],
                            name='tokens_mask')
 
-    def init_minibatch(self, batch_data: Dict[str, Any]) -> None:
+    def init_minibatch(self, batch_data: Dict[str, Any], code=True) -> None:
         super().init_minibatch(batch_data)
         batch_data['tokens'] = []
         batch_data['tokens_mask'] = []
+        if self.hyperparameters['use_parent'] and code:
+            batch_data['parent_tokens'] = []
+            batch_data['parent_tokens_mask'] = []
 
     def minibatch_to_feed_dict(self, batch_data: Dict[str, Any], feed_dict: Dict[tf.Tensor, Any], is_train: bool) -> None:
         super().minibatch_to_feed_dict(batch_data, feed_dict, is_train)
         write_to_feed_dict(feed_dict, self.placeholders['tokens'], batch_data['tokens'])
         write_to_feed_dict(feed_dict, self.placeholders['tokens_mask'], batch_data['tokens_mask'])
+
+        if self.hyperparameters['use_parent'] and batch_data.get('parent_tokens', None):
+            write_to_feed_dict(feed_dict, self.placeholders['parent_tokens'], batch_data['parent_tokens'])
+            write_to_feed_dict(feed_dict, self.placeholders['parent_tokens_mask'], batch_data['parent_tokens_mask'])

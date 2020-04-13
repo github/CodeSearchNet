@@ -134,6 +134,10 @@ def run(arguments, tag_in_vcs=False) -> None:
     batch_size = arguments.get('--batch-size')
     if batch_size:
         hyperparameters['batch_size'] = int(batch_size)
+    use_parent = arguments.get('--use-parent')
+    if not use_parent:
+        hyperparameters['use_parent'] = bool(use_parent)
+
     # hyperparameters['code_use_bpe'] = False
     # hyperparameters['query_use_bpe'] = False
 
@@ -201,9 +205,10 @@ if __name__ == '__main__':
     args = docopt(__doc__)
     args['--model'] = 'selfatt'
     args['--dryrun'] = True
-    # args['--testrun'] = True
+    # args['--testrun'] = False
     args['--sequential'] = True
-    args['--max_epoch'] = 20
+    args['--max_num_epochs'] = 2
+    # args['--use-parent'] = False
     args['--batch-size'] = 2
 
     # run_and_debug(lambda: run(args), args['--debug'])

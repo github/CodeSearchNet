@@ -44,8 +44,8 @@ if __name__=='__main__':
 
     #[26045, 28475]
 
-    path = '../resources/data/python/final/jsonl/train_old/temp_train_10.jsonl.gz'
-    s_path = '../resources/data/python/final/jsonl/train/temp_train_10_dfs_parent.jsonl.gz'
+    path = '../resources/data/python/final/jsonl/valid_old/temp_valid_10.jsonl.gz'
+    s_path = '../resources/data/python/final/jsonl/valid/temp_valid_10_dfs_parent.jsonl.gz'
 
     a = RichPath.create(path)
     s = RichPath.create(s_path)
