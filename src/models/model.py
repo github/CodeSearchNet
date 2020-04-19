@@ -939,7 +939,8 @@ class Model(ABC):
                     code_tokens,
                     function_name,
                     result_holder=result_holder,
-                    is_test=True)
+                    is_test=True,
+                    parent_tokens=sample_to_parse['parent_dfs'])
             else:
                 return False
 
