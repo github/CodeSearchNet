@@ -361,7 +361,7 @@ class Model(ABC):
         # ...then take the reciprocal of that to get the MRR for each individual query (you will need to take the mean later)
         self.ops['mrr'] = 1 / tf.reduce_sum(tf.to_float(compared_scores), axis=1)
 
-    def _make_training_step(self) -> None:
+    def _make_training_step(self):
         """
         Constructs self.ops['train_step'] from self.ops['loss'] and hyperparameters.
         """
