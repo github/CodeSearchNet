@@ -44,7 +44,7 @@ RUN pip --no-cache-dir install --upgrade \
     altair==3.2.0 \
     annoy==1.16.0 \
     docopt==0.6.2 \
-    dpu_utils==0.1.34 \
+    dpu_utils==0.2.17 \
     ipdb==0.12.2 \
     jsonpath_rw_ext==1.2.2 \
     jupyter==1.0.0 \
