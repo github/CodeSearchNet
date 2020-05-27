@@ -123,7 +123,7 @@ if __name__ == '__main__':
         for index, vector in tqdm(enumerate(code_representations)):
             if vector is not None:
                 indices.add_item(index, vector)
-        indices.build(10)
+        indices.build(200)
 
         for query in queries:
             for idx, _ in zip(*query_model(query, model, indices, language)):
