@@ -1,3 +1,9 @@
+> ## The Challenge has been concluded
+> No new submissions to the benchmark will be accepted. However, we would like
+> to encourage practitioners and researchers to continue using
+> the dataset and the human relevance annotations. Please see the
+> [main README](/README.md) for more information.
+
 ## Submitting runs to the benchmark
 
 The [Weights & Biases (W&B)](https://www.wandb.com) [benchmark](https://app.wandb.ai/github/CodeSearchNet/benchmark) tracks and compares models trained on the CodeSearchNet dataset by the global machine learning research community. Anyone is welcome to submit their results for review.
