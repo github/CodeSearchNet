@@ -4,6 +4,12 @@
 
 [paper]: https://arxiv.org/abs/1909.09436
 
+> # The CodeSearchNet challenge has been concluded
+> We would like to thank all participants for their submissions
+> and we hope that this challenge provided insights to practitioners and researchers about the challenges in semantic code search and motivated new research. We would like to encourage everyone to continue using the dataset and the human evaluations, which we now provide publicly. Please, see below for details.
+>
+> No new submissions to the challenge will be accepted.
+
 **Table of Contents**
 
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
@@ -83,11 +89,11 @@ More context regarding the motivation for this problem is in this [technical rep
 
 ## Evaluation
 
-  The metric we use for evaluation is [Normalized Discounted Cumulative Gain](https://en.wikipedia.org/wiki/Discounted_cumulative_gain#Normalized_DCG).  Please reference [this paper][paper] for further details regarding model evaluation.
+  The metric we use for evaluation is [Normalized Discounted Cumulative Gain](https://en.wikipedia.org/wiki/Discounted_cumulative_gain#Normalized_DCG).  Please reference [this paper][paper] for further details regarding model evaluation. The evaluation script can be found [here](/src/relevanceeval.py).
 
 ### Annotations
 
-  We manually annotated retrieval results for the six languages from 99 general [queries](resources/queries.csv). This dataset is used as groundtruth data for evaluation _only_. Please refer to [this paper][paper] for further details on the annotation process.
+  We manually annotated retrieval results for the six languages from 99 general [queries](resources/queries.csv). This dataset is used as groundtruth data for evaluation _only_. Please refer to [this paper][paper] for further details on the annotation process. These annotations were used to compute the scores in the leaderboard. Now that the competition has been concluded, you can find the annotations, along with the annotator comments [here](/resources/annotationStore.csv).
 
 
 ## Setup
@@ -242,6 +248,13 @@ For example, the link for the `java` is:
 
 The size of the dataset is approximately 20 GB.  The various files and the directory structure are explained [here](resources/README.md).
 
+## Human Relevance Judgements
+To train neural models with a large dataset we use the documentation comments (e.g. docstrings) as a proxy. For evaluation (and the leaderboard), we collected human relevance judgements of pairs of realistic-looking natural language queries and code snippets. Now that the challenge has been concluded, we provide the data [here](/resources/annotationStore.csv) as a `.csv`, with the following fields:
+* Language: The programming language of the snippet.
+* Query: The natural language query
+* GitHubUrl: The URL of the target snippet. This matches the `URL` key in the data (see [here](#schema--format)).
+* Relevance: the 0-3 human relevance judgement, where "3" is the highest score (very relevant) and "0" is the lowest (irrelevant).
+* Notes: a free-text field with notes that annotators optionally provided.
 
 # Running Our Baseline Model
 
