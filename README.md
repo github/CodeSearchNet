@@ -6,7 +6,7 @@
 
 > # The CodeSearchNet challenge has been concluded
 > We would like to thank all participants for their submissions
-> and we hope that this challenge provided insights to practitioners and researchers about the challenges in semantic code search and motivated new research. We would like to encourage everyone to continue using the dataset and the human evaluations, which we now provide publicly. Please, see below for details.
+> and we hope that this challenge provided insights to practitioners and researchers about the challenges in semantic code search and motivated new research. We would like to encourage everyone to continue using the dataset and the human evaluations, which we now provide publicly. Please, see below for details, specifically the [Evaluation](https://github.com/github/CodeSearchNet#evaluation) section.
 >
 > No new submissions to the challenge will be accepted.
 
