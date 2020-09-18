@@ -79,7 +79,15 @@ Finally, you can submit your run to the [community benchmark](https://app.wandb.
 
 We hope that CodeSearchNet is a step towards engaging with the broader machine learning and NLP community regarding the relationship between source code and natural language. We describe a specific task here, but we expect and welcome other uses of our dataset.
 
-More context regarding the motivation for this problem is in this [technical report][paper].
+More context regarding the motivation for this problem is in this [technical report][paper]. Please, cite the dataset and the challenge as
+```
+@article{husain2019codesearchnet,
+  title={{CodeSearchNet} challenge: Evaluating the state of semantic code search},
+  author={Husain, Hamel and Wu, Ho-Hsiang and Gazit, Tiferet and Allamanis, Miltiadis and Brockschmidt, Marc},
+  journal={arXiv preprint arXiv:1909.09436},
+  year={2019}
+}
+```
 
 ## Data
 
