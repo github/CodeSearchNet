@@ -1,5 +1,8 @@
 # Function Parser
 
+> # A community-driven, standalone version of the function-parsing code in this folder, that can be installed as a PyPI package can be found [here](https://github.com/ncoop57/function_parser).
+> The code in this codebase is maintained only for fixing issues related with the CodeSearchNet challenge data.
+
 This repository contains various utils to parse GitHub repositories into function definition and docstring pairs. It is based on [tree-sitter](https://github.com/tree-sitter/) to parse code into [ASTs](https://en.wikipedia.org/wiki/Abstract_syntax_tree) and apply heuristics to parse metadata in more details. Currently, it supports 6 languages: Python, Java, Go, Php, Ruby, and Javascript.
 
 It also parses function calls and links them with their definitions for Python.
