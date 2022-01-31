@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     definitions = defaultdict(list)
     with open(args['DEFINITION_FILE'], 'rb') as f:
-        for d in pickle.load(f)
+        for d in pickle.load(f):
             definitions[d['nwo']].append(d)
     definitions = dict(definitions)
 
